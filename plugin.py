@@ -63,7 +63,11 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def powershell_exe(cls) -> str:
-        return "powershell"
+        return {
+            "linux": "powershell",
+            "windows": "powershell.exe",
+            "osx": "pwsh"
+        }[sublime.platform()]
 
     @classmethod
     def run(cls, *args: Any, **kwargs: Any) -> bytes:
