@@ -1,33 +1,8 @@
 {
-	"command": [
-		"$powershell_exe",
-		"-NoLogo",
-		"-NoProfile",
-		"-NonInteractive",
-		"-ExecutionPolicy",
-		"Bypass",
-		"-Command",
-		"$start_script",
-		"-HostName",
-		"'Sublime Text LSP'",
-		"-HostProfileId",
-		"subl",
-		"-HostVersion",
-		"$host_version",
-		"-SessionDetailsPath",
-		"$session_details_path",
-		"-LogPath",
-		"$log_path",
-		"-LogLevel",
-		"Normal",
-		"-FeatureFlags",
-		"@()",
-		"-AdditionalModules",
-		"@()",
-		"-BundledModulesPath",
-		"$bundled_modules_path",
-		"-Stdio",
-	],
+	// The path to the powershell executable. Leave this empty to let the
+	// plugin decide.
+	// For Windows this is "powershell.exe", for macOS/Linux it's "pwsh".
+	"powershell_exe": "",
 	"version": "2.2.0",
 	"languages": [
 		{
@@ -36,27 +11,181 @@
 	],
 	"initializationOptions": {},
 	"settings": {
-		// TODO: UNFINISHED
-		"powershell.developer.featureFlags": [],
-		"powershell.developer.editorServicesWaitForDebugger": [],
-		"powershell.codeFormatting.useCorrectCasing": [],
-		"powershell.codeFormatting.alignPropertyValuePairs": [],
-		"powershell.codeFormatting.ignoreOneLineBlock": [],
-		"powershell.codeFormatting.whitespaceAroundPipe": [],
-		"powershell.codeFormatting.whitespaceInsideBrace": [],
-		"powershell.codeFormatting.whitespaceAfterSeparator": [],
-		"powershell.codeFormatting.whitespaceAroundOperator": [],
-		"powershell.codeFormatting.whitespaceBeforeOpenParen": [],
-		"powershell.codeFormatting.whitespaceBeforeOpenBrace": [],
-		"powershell.codeFormatting.pipelineIndentationStyle": [],
-		"powershell.codeFormatting.newLineAfterCloseBrace": [],
-		"powershell.codeFormatting.newLineAfterOpenBrace": [],
-		"powershell.codeFormatting.openBraceOnSameLine": [],
-		"powershell.codeFormatting.preset": [],
-		"powershell.codeFolding.showLastLine": [],
+		// Launches the language service with the /waitForDebugger flag to force it
+		// to wait for a .NET debugger to attach before proceeding.
+		"powershell.developer.editorServicesWaitForDebugger": false,
+		// Shows the last line of a folded section similar to the default VSCode
+		// folding style. When disabled, the entire folded region is hidden.
+		"powershell.codeFolding.showLastLine": true,
+		// Use correct casing for cmdlets.
+		"powershell.codeFormatting.useCorrectCasing": false,
+		// Multi-line pipeline style settings (default: NoIndentation).
+		// possible values: IncreaseIndentationForFirstPipeline, IncreaseIndentationAfterEveryPipeline, NoIndentation, None
+		"powershell.codeFormatting.pipelineIndentationStyle": "NoIndentation",
+		// Switches focus to the console when a script selection is run or a script
+		// file is debugged. This is an accessibility feature. To disable it, set to
+		// false.
+		"powershell.integratedConsole.focusConsoleOnExecute": true,
+		// Adds a space between a keyword (if, elseif, while, switch, etc) and its
+		// associated conditional expression.
+		"powershell.codeFormatting.whitespaceBeforeOpenParen": true,
+		// Specifies an array of versionName / exePath pairs where exePath points to
+		// a non-standard install location for PowerShell and versionName can be
+		// used to reference this path with the powershell.powerShellDefaultVersion
+		// setting.
+		// NO DEFAULT VALUE <-- NEEDS ATTENTION
+		"powershell.powerShellAdditionalExePaths": [],
+		// Align assignment statements in a hashtable or a DSC Configuration.
+		"powershell.codeFormatting.alignPropertyValuePairs": true,
+		// Adds a space after an opening brace ('{') and before a closing brace
+		// ('}').
+		"powershell.codeFormatting.whitespaceInsideBrace": true,
+		// Specifies the url of the GitHub project in which to generate bug reports.
+		"powershell.bugReporting.project": "https://github.com/PowerShell/vscode-powershell",
+		// Specifies whether you should be prompted to update your version of
+		// PowerShell.
+		"powershell.promptToUpdatePowerShell": true,
+		// An array of strings that enable experimental features in the PowerShell
+		// extension.
+		"powershell.developer.featureFlags": null,
+		// Sets the codeformatting options to follow the given indent style in a way
+		// that is compatible with PowerShell syntax. For more information about the
+		// brace styles please refer to
+		// https://github.com/PoshCode/PowerShellPracticeAndStyle/issues/81.
+		// possible values: Custom, Allman, OTBS, Stroustrup
+		"powershell.codeFormatting.preset": "Custom",
+		// Loads user and system-wide PowerShell profiles (profile.ps1 and
+		// Microsoft.VSCode_profile.ps1) into the PowerShell session. This affects
+		// IntelliSense and interactive script execution, but it does not affect the
+		// debugger.
+		"powershell.enableProfileLoading": true,
+		// Determines whether a temporary PowerShell Integrated Console is created
+		// for each debugging session, useful for debugging PowerShell classes and
+		// binary modules.
+		"powershell.debugging.createTemporaryIntegratedConsole": false,
+		// Show the Run and Run Selection buttons in the editor titlebar.
+		"powershell.buttons.showRunButtons": true,
+		// REMOVED. Please use the "powershell.powerShellDefaultVersion" setting
+		// instead.
+		"powershell.powerShellExePath": "",
+		// Enables syntax based code folding. When disabled, the default indentation
+		// based code folding is used.
 		"powershell.codeFolding.enable": true,
-		"powershell.scriptAnalysis.settingsPath": [],
+		// Specify array of Modules to exclude from Command Explorer listing.
+		"powershell.sideBar.CommandExplorerExcludeFilter": [],
+		// Defines the verbosity of output to be used when debugging a test or a
+		// block. For Pester 5 and newer the default value Diagnostic will print
+		// additional information about discovery, skipped and filtered tests,
+		// mocking and more.
+		// possible values: None, Minimal, Normal, Detailed, Diagnostic
+		"powershell.pester.debugOutputVerbosity": "Diagnostic",
+		// Shows the integrated console when the PowerShell extension is
+		// initialized.
+		"powershell.integratedConsole.showOnStartup": true,
+		// Adds a newline (line break) after a closing brace.
+		"powershell.codeFormatting.newLineAfterCloseBrace": true,
+		// Trims extraneous whitespace (more than 1 character) before and after the
+		// pipeline operator ('|').
+		"powershell.codeFormatting.trimWhitespaceAroundPipe": false,
+		// Specifies whether you should be prompted to update your version of
+		// PackageManagement if it's under 1.4.6.
+		"powershell.promptToUpdatePackageManagement": true,
+		// Adds a space between a keyword and its associated scriptblock expression.
+		"powershell.codeFormatting.whitespaceBeforeOpenBrace": true,
+		// Replaces aliases with their aliased name.
+		"powershell.codeFormatting.autoCorrectAliases": false,
+		// Adds a space after a separator (',' and ';').
+		"powershell.codeFormatting.whitespaceAfterSeparator": true,
+		// Starts the PowerShell extension's underlying PowerShell process as a
+		// login shell, if applicable.
+		"powershell.startAsLoginShell.osx": true,
+		// Starts the PowerShell extension's underlying PowerShell process as a
+		// login shell, if applicable.
+		"powershell.startAsLoginShell.linux": false,
+		// Falls back to the legacy (lightweight) ReadLine experience. This will
+		// disable the use of PSReadLine in the PowerShell Integrated Console.
+		"powershell.integratedConsole.useLegacyReadLine": false,
+		// Do not show the Powershell Integrated Console banner on launch
+		"powershell.integratedConsole.suppressStartupBanner": false,
+		// Specifies the visibility of the Command Explorer in the PowerShell Side
+		// Bar.
+		"powershell.sideBar.CommandExplorerVisibility": true,
+		// Uses the 32-bit language service on 64-bit Windows. This setting has no
+		// effect on 32-bit Windows or on the PowerShell extension debugger, which
+		// has its own architecture configuration.
+		"powershell.useX86Host": false,
+		// Specifies the PowerShell version name, as displayed by the 'PowerShell:
+		// Show Session Menu' command, used when the extension loads e.g "Windows
+		// PowerShell (x86)" or "PowerShell Core 6 (x64)". You can specify
+		// additional PowerShell executables by using the
+		// "powershell.powerShellAdditionalExePaths" setting.
+		// NO DEFAULT VALUE <-- NEEDS ATTENTION
+		"powershell.powerShellDefaultVersion": "",
+		// Adds spaces before and after an operator ('=', '+', '-', etc.).
+		"powershell.codeFormatting.whitespaceAroundOperator": true,
+		// Places open brace on the same line as its associated statement.
+		"powershell.codeFormatting.openBraceOnSameLine": true,
+		// Specifies an alternate path to the folder containing modules that are
+		// bundled with the PowerShell extension (i.e. PowerShell Editor Services,
+		// PSScriptAnalyzer, Plaster)
+		// NO DEFAULT VALUE <-- NEEDS ATTENTION
+		"powershell.developer.bundledModulesPath": "",
+		// Sets the logging verbosity level for the PowerShell Editor Services host
+		// executable.  Valid values are 'Diagnostic', 'Verbose', 'Normal',
+		// 'Warning', and 'Error'
+		// possible values: Diagnostic, Verbose, Normal, Warning, Error
+		"powershell.developer.editorServicesLogLevel": "Normal",
+		// When the PowerShell extension is starting up, it checks for a session
+		// file in order to connect to the language server. This setting determines
+		// how long until checking for the session file times out. (default is 240
+		// seconds or 4 minutes)
+		"powershell.developer.waitForSessionFileTimeoutSeconds": 240,
+		// Adds a newline (line break) after an open brace.
+		"powershell.codeFormatting.newLineAfterOpenBrace": true,
+		// Adds a space before and after the pipeline operator ('|') if it is
+		// missing.
+		"powershell.codeFormatting.addWhitespaceAroundPipe": true,
+		// Does not reformat one-line code blocks, such as "if (...) {...} else
+		// {...}".
+		"powershell.codeFormatting.ignoreOneLineBlock": true,
+		// Enables real-time script analysis from PowerShell Script Analyzer. Uses
+		// the newest installed version of the PSScriptAnalyzer module or the
+		// version bundled with this extension, if it is newer.
 		"powershell.scriptAnalysis.enable": true,
-		"powershell.helpCompletion": [],
+		// Removes redundant whitespace between parameters.
+		"powershell.codeFormatting.whitespaceBetweenParameters": false,
+		// Specifies the path to a PowerShell Script Analyzer settings file. To
+		// override the default settings for all projects, enter an absolute path,
+		// or enter a path relative to your workspace.
+		"powershell.scriptAnalysis.settingsPath": "PSScriptAnalyzerSettings.psd1",
+		// Defines the verbosity of output to be used. For Pester 5 and newer the
+		// default value FromPreference, will use the Output settings from the
+		// $PesterPreference defined in the caller context, and will default to
+		// Normal if there is none. For Pester 4 the FromPreference and Normal
+		// options map to All, and Minimal option maps to Fails.
+		// possible values: FromPreference, None, Minimal, Normal, Detailed, Diagnostic
+		"powershell.pester.outputVerbosity": "FromPreference",
+		// Controls the comment-based help completion behavior triggered by typing
+		// '##'. Set the generated help style with 'BlockComment' or 'LineComment'.
+		// Disable the feature with 'Disabled'.
+		// possible values: Disabled, BlockComment, LineComment
+		"powershell.helpCompletion": "BlockComment",
+		// Show buttons in the editor titlebar for moving the panel around.
+		"powershell.buttons.showPanelMovementButtons": false,
+		// Use code lense that is compatible with Pester 4. Disabling this will show
+		// 'Run Tests' on all It, Describe and Context blocks, and will correctly
+		// work only with Pester 5 and newer.
+		"powershell.pester.useLegacyCodeLens": true,
+		// Use the vscode API to clear the terminal since that's the only reliable
+		// way to clear the scrollback buffer. Turn this on if you're use to 'Clear-
+		// Host' clearing scroll history as wellclear-terminal-via-lsp.
+		// NO DEFAULT VALUE <-- NEEDS ATTENTION
+		"powershell.integratedConsole.forceClearScrollbackBuffer": false,
+		// Starts PowerShell extension features automatically when a PowerShell file
+		// opens. If false, to start the extension, use the 'PowerShell: Restart
+		// Current Session' command. IntelliSense, code navigation, integrated
+		// console, code formatting, and other features are not enabled until the
+		// extension starts.
+		"powershell.startAutomatically": true,
 	}
 }
