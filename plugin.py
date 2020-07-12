@@ -39,7 +39,26 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def get_windows_command(cls) -> List[str]:
-        return []
+        return [
+            cls.powershell_exe(),
+            "-ExecutionPolicy",
+            "Bypass",
+            "-File",
+            cls.start_script(),
+            "-BundledModulesPath",
+            cls.bundled_modules_path(),
+            "-HostName",
+            "SublimeText",
+            "-HostProfileId",
+            "SublimeText",
+            "-HostVersion",
+            cls.host_version(),
+            "-Stdio",
+            "-LogPath",
+            cls.log_path(),
+            "-SessionDetailsPath",
+            cls.session_details_path(),
+        ]
 
     @classmethod
     def get_unix_command(cls) -> List[str]:
@@ -133,7 +152,6 @@ class PowerShellEditorServices(AbstractPlugin):
     def install_or_update(cls) -> None:
         shutil.rmtree(cls.basedir(), ignore_errors=True)
         try:
-            os.makedirs(cls.basedir(), exist_ok=True)
             zipfile = os.path.join(sublime.cache_path(), "{}.zip".format(cls.name()))
             urlretrieve(URL.format(cls.version_str()), zipfile)
             with ZipFile(zipfile, "r") as f:
