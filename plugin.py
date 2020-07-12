@@ -18,17 +18,6 @@ class PowerShellEditorServices(AbstractPlugin):
         return cls.__name__
 
     @classmethod
-    def additional_variables(cls) -> Optional[Dict[str, str]]:
-        return {
-            "powershell_exe": cls.powershell_exe(),
-            "start_script": cls.start_script(),
-            "host_version": cls.host_version(),
-            "session_details_path": cls.session_details_path(),
-            "log_path": cls.log_path(),
-            "bundled_modules_path": cls.bundled_modules_path()
-        }
-
-    @classmethod
     def configuration(cls) -> Tuple[sublime.Settings, str]:
         settings, file_path = super().configuration()
         if sublime.platform() == "windows":
@@ -104,7 +93,7 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def bundled_modules_path(cls) -> str:
-        return os.path.join(cls.basedir(), "PowerShellEditorServices", "bin")
+        return cls.basedir()
 
     @classmethod
     def dll_path(cls) -> str:
