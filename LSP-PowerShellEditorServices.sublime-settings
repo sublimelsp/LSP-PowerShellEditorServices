@@ -20,7 +20,8 @@
 		// Use correct casing for cmdlets.
 		"powershell.codeFormatting.useCorrectCasing": false,
 		// Multi-line pipeline style settings (default: NoIndentation).
-		// possible values: IncreaseIndentationForFirstPipeline, IncreaseIndentationAfterEveryPipeline, NoIndentation, None
+		// possible values: IncreaseIndentationForFirstPipeline, IncreaseIndentationAfterEveryPipeline,
+		// NoIndentation, None
 		"powershell.codeFormatting.pipelineIndentationStyle": "NoIndentation",
 		// Switches focus to the console when a script selection is run or a script
 		// file is debugged. This is an accessibility feature. To disable it, set to
@@ -33,7 +34,6 @@
 		// a non-standard install location for PowerShell and versionName can be
 		// used to reference this path with the powershell.powerShellDefaultVersion
 		// setting.
-		// NO DEFAULT VALUE <-- NEEDS ATTENTION
 		"powershell.powerShellAdditionalExePaths": [],
 		// Align assignment statements in a hashtable or a DSC Configuration.
 		"powershell.codeFormatting.alignPropertyValuePairs": true,
@@ -119,7 +119,6 @@
 		// PowerShell (x86)" or "PowerShell Core 6 (x64)". You can specify
 		// additional PowerShell executables by using the
 		// "powershell.powerShellAdditionalExePaths" setting.
-		// NO DEFAULT VALUE <-- NEEDS ATTENTION
 		"powershell.powerShellDefaultVersion": "",
 		// Adds spaces before and after an operator ('=', '+', '-', etc.).
 		"powershell.codeFormatting.whitespaceAroundOperator": true,
@@ -128,7 +127,6 @@
 		// Specifies an alternate path to the folder containing modules that are
 		// bundled with the PowerShell extension (i.e. PowerShell Editor Services,
 		// PSScriptAnalyzer, Plaster)
-		// NO DEFAULT VALUE <-- NEEDS ATTENTION
 		"powershell.developer.bundledModulesPath": "",
 		// Sets the logging verbosity level for the PowerShell Editor Services host
 		// executable.  Valid values are 'Diagnostic', 'Verbose', 'Normal',
@@ -179,7 +177,6 @@
 		// Use the vscode API to clear the terminal since that's the only reliable
 		// way to clear the scrollback buffer. Turn this on if you're use to 'Clear-
 		// Host' clearing scroll history as wellclear-terminal-via-lsp.
-		// NO DEFAULT VALUE <-- NEEDS ATTENTION
 		"powershell.integratedConsole.forceClearScrollbackBuffer": false,
 		// Starts PowerShell extension features automatically when a PowerShell file
 		// opens. If false, to start the extension, use the 'PowerShell: Restart
