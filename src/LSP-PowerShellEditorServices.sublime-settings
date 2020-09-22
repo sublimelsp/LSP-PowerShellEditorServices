@@ -3,7 +3,6 @@
 	// plugin decide.
 	// For Windows this is "powershell.exe", for macOS/Linux it's "pwsh".
 	"powershell_exe": "",
-	"version": "2.2.0",
 	"languages": [
 		{
 			"languageId": "powershell"
