@@ -5,7 +5,7 @@ function set-output
 {
     local value="${2//'%'/'%25'}"
     local value="${value//$'\n'/'%0A'}"
-    echo "::set-output $1::${value//$'\r'/'%0D'}"
+    echo "::set-output name=$1::${value//$'\r'/'%0D'}"
 }
 
 function main
