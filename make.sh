@@ -1,23 +1,34 @@
 #!/usr/bin/env bash
 set -e
-rm -rf out
-rm -rf PowerShellEditorServices
-rm -f PowerShellEditorServices.zip
-rm -f LSP-PowerShellEditorServices.zip
-PWSH_GIT_TAG=${1:-v2.2.0}
-echo "PowerShellEditorServices git tag: ${PWSH_GIT_TAG}"
-mkdir -p out
-cp -R src/* out/
-cp LICENSE out/
-cp NOTICE out/
-touch out/.no-sublime-package
-curl -L -s -S >/dev/null https://github.com/PowerShell/PowerShellEditorServices/releases/download/${PWSH_GIT_TAG}/PowerShellEditorServices.zip -o PowerShellEditorServices.zip
-unzip -qq PowerShellEditorServices.zip
-mv PowerShellEditorServices/* out/
-rmdir PowerShellEditorServices
-rm PowerShellEditorServices.zip
-pushd out
-    zip -qq -r LSP-PowerShellEditorServices.zip .
-popd
-mv out/LSP-PowerShellEditorServices.zip .
-rm -rf out
+
+function set-output
+{
+    local value="${2//'%'/'%25'}"
+    local value="${value//$'\n'/'%0A'}"
+    echo "::set-output $1::${value//$'\r'/'%0D'}"
+}
+
+function main
+{
+    local pwsh=PowerShellEditorServices
+    rm -rf out
+    rm -rf $pwsh
+    rm -f $pwsh.zip
+    rm -f LSP-$pwsh.zip
+    mkdir -p out
+    cp -R src/* out/
+    cp LICENSE out/
+    cp NOTICE out/
+    touch out/.no-sublime-package
+    curl -L -s -S >/dev/null https://github.com/PowerShell/$pwsh/releases/download/$1/$pwsh.zip -o $pwsh.zip
+    unzip -qq $pwsh.zip
+    mv $pwsh/* out/
+    rmdir $pwsh
+    rm $pwsh.zip
+    pushd out && zip -qq -r LSP-$pwsh.zip . && popd
+    mv out/LSP-$pwsh.zip .
+    rm -rf out
+    set-output artifact LSP-$pwsh.zip
+}
+
+main "$@"
