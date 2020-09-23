@@ -28,7 +28,9 @@ jobs:
           release_name: Release ${{ github.event.inputs.package-semver }}
           draft: true
           prerelease: false
-          body: This release contains version ${{ github.event.inputs.server-semver }} of PowerShellEditorServices.
+          body: |
+            This release contains version ${{ github.event.inputs.server-semver }} of PowerShellEditorServices.
+            Sublime-Text-Version-Range: >=4070
       - name: Upload Zip
         uses: actions/upload-release-asset@v1
         env:
