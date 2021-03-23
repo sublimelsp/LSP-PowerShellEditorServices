@@ -4,11 +4,7 @@
 	// For Windows this is "powershell.exe", for macOS/Linux it's "pwsh".
 	"powershell_exe": "",
 	"version": "2.3.0",
-	"languages": [
-		{
-			"languageId": "powershell"
-		}
-	],
+	"selector": "source.powershell",
 	"initializationOptions": {},
 	"settings": {
 		// Launches the language service with the /waitForDebugger flag to force it
