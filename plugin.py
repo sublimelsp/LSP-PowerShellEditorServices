@@ -73,7 +73,7 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def basedir(cls) -> str:
-        return os.path.join(sublime.cache_path(), "LSP-{}".format(cls.name()))
+        return os.path.join(cls.storage_path(), "LSP-{}".format(cls.name()))
 
     @classmethod
     def start_script(cls) -> str:
@@ -141,11 +141,11 @@ class PowerShellEditorServices(AbstractPlugin):
     def install_or_update(cls) -> None:
         shutil.rmtree(cls.basedir(), ignore_errors=True)
         try:
-            zipfile = os.path.join(sublime.cache_path(), "{}.zip".format(cls.name()))
+            zipfile = os.path.join(cls.storage_path(), "{}.zip".format(cls.name()))
             urlretrieve(URL.format(cls.version_str()), zipfile)
             with ZipFile(zipfile, "r") as f:
-                f.extractall(sublime.cache_path())
-            os.rename(os.path.join(sublime.cache_path(), cls.name()), cls.basedir())
+                f.extractall(cls.storage_path())
+            os.rename(os.path.join(cls.storage_path(), cls.name()), cls.basedir())
             os.unlink(zipfile)
         except Exception:
             shutil.rmtree(cls.basedir(), ignore_errors=True)
