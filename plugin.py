@@ -1,9 +1,15 @@
+from urllib.request import urlretrieve
+from zipfile import ZipFile
 import os
+import shutil
+import subprocess
 import tempfile
 
 from LSP.plugin import AbstractPlugin
-from LSP.plugin.core.typing import Any, Tuple, List
+from LSP.plugin.core.typing import Any, Dict, Optional, Tuple, List
 import sublime
+
+URL = "https://github.com/PowerShell/PowerShellEditorServices/releases/download/v{}/PowerShellEditorServices.zip"
 
 
 class PowerShellEditorServices(AbstractPlugin):
@@ -67,7 +73,7 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def basedir(cls) -> str:
-        return os.path.join(sublime.packages_path(), "LSP-{}".format(cls.name()))
+        return os.path.join(sublime.cache_path(), "LSP-{}".format(cls.name()))
 
     @classmethod
     def start_script(cls) -> str:
@@ -90,6 +96,15 @@ class PowerShellEditorServices(AbstractPlugin):
         return cls.basedir()
 
     @classmethod
+    def dll_path(cls) -> str:
+        return os.path.join(cls.basedir(), cls.name(), "bin", "Common", "Microsoft.PowerShell.EditorServices.dll")
+
+    @classmethod
+    def version_str(cls) -> str:
+        settings = sublime.load_settings("LSP-{}.sublime-settings".format(cls.name()))
+        return str(settings.get("version"))
+
+    @classmethod
     def powershell_exe(cls) -> str:
         settings = sublime.load_settings("LSP-{}.sublime-settings".format(cls.name()))
         powershell_exe = settings.get("powershell_exe")
@@ -101,7 +116,40 @@ class PowerShellEditorServices(AbstractPlugin):
             "osx": "pwsh"
         }[sublime.platform()]
 
-    # custom notification handlers
+    @classmethod
+    def run(cls, *args: Any, **kwargs: Any) -> bytes:
+        if sublime.platform() == "windows":
+            startupinfo = subprocess.STARTUPINFO()  # type: ignore
+            flag = subprocess.STARTF_USESHOWWINDOW  # type: ignore
+            startupinfo.dwFlags |= flag
+        else:
+            startupinfo = None
+        return subprocess.check_output(args=args, cwd=kwargs.get("cwd"), startupinfo=startupinfo)
+
+    @classmethod
+    def needs_update_or_installation(cls) -> bool:
+        try:
+            cmd = '[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{}").FileVersion'.format(cls.dll_path())
+            version_info = cls.run(cls.powershell_exe(), "-Command", cmd).decode('ascii')
+            version_info = ".".join(version_info.splitlines()[0].strip().split('.')[0:3])
+            return cls.version_str() != version_info
+        except Exception:
+            pass
+        return True
+
+    @classmethod
+    def install_or_update(cls) -> None:
+        shutil.rmtree(cls.basedir(), ignore_errors=True)
+        try:
+            zipfile = os.path.join(sublime.cache_path(), "{}.zip".format(cls.name()))
+            urlretrieve(URL.format(cls.version_str()), zipfile)
+            with ZipFile(zipfile, "r") as f:
+                f.extractall(sublime.cache_path())
+            os.rename(os.path.join(sublime.cache_path(), cls.name()), cls.basedir())
+            os.unlink(zipfile)
+        except Exception:
+            shutil.rmtree(cls.basedir(), ignore_errors=True)
+            raise
 
     def m_powerShell_executionStatusChanged(self, params: Any) -> None:
         pass
