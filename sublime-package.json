@@ -167,7 +167,7 @@
               "properties": {
                 "LSP": {
                   "properties": {
-                    "LSP-PowerShellEditorServices": {
+                    "PowerShellEditorServices": {
                       "$ref": "sublime://settings/LSP-PowerShellEditorServices#/definitions/PluginConfig"
                     }
                   }
