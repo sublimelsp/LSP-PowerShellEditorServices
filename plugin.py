@@ -140,7 +140,7 @@ class PowerShellEditorServices(AbstractPlugin):
     @classmethod
     def install_or_update(cls) -> None:
         shutil.rmtree(cls.basedir(), ignore_errors=True)
-        os.makedirs(cls.basedir(), exist_ok=True)
+        os.makedirs(cls.storage_path(), exist_ok=True)
         try:
             zipfile = os.path.join(cls.storage_path(), "{}.zip".format(cls.name()))
             urlretrieve(URL.format(cls.version_str()), zipfile)
