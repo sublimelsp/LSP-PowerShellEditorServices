@@ -2,6 +2,9 @@
   "contributions": {
     "settings": [
       {
+        "file_patterns": [
+          "/LSP-PowerShellEditorServices.sublime-settings"
+        ],
         "schema": {
           "$id": "sublime://settings/LSP-PowerShellEditorServices",
           "allOf": [
@@ -16,151 +19,156 @@
             "PluginConfig": {
               "properties": {
                 "settings": {
+                  "additionalProperties": false,
                   "properties": {
-                    "powershell.codeFormatting.useConstantStrings": {
-                      "description": "Use single quotes if a string is not interpolated and its value does not contain a single quote.",
-                      "default": false,
+                    "powershell.codeFormatting.addWhitespaceAroundPipe": {
+                      "default": true,
+                      "description": "Adds a space before and after the pipeline operator ('|') if it is missing.",
                       "type": "boolean"
                     },
-                    "powershell.scriptAnalysis.settingsPath": {
-                      "description": "Specifies the path to a PowerShell Script Analyzer settings file. To override the default settings for all projects, enter an absolute path, or enter a path relative to your workspace.",
-                      "default": "PSScriptAnalyzerSettings.psd1",
-                      "type": "string"
+                    "powershell.codeFormatting.alignPropertyValuePairs": {
+                      "default": true,
+                      "description": "Align assignment statements in a hashtable or a DSC Configuration.",
+                      "type": "boolean"
                     },
-                    "powershell.codeFormatting.whitespaceBetweenParameters": {
-                      "description": "Removes redundant whitespace between parameters.",
+                    "powershell.codeFormatting.autoCorrectAliases": {
                       "default": false,
+                      "description": "Replaces aliases with their aliased name.",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.ignoreOneLineBlock": {
+                      "default": true,
+                      "description": "Does not reformat one-line code blocks, such as \"if (...) {...} else {...}\".",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.newLineAfterCloseBrace": {
+                      "default": true,
+                      "description": "Adds a newline (line break) after a closing brace.",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.newLineAfterOpenBrace": {
+                      "default": true,
+                      "description": "Adds a newline (line break) after an open brace.",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.openBraceOnSameLine": {
+                      "default": true,
+                      "description": "Places open brace on the same line as its associated statement.",
                       "type": "boolean"
                     },
                     "powershell.codeFormatting.pipelineIndentationStyle": {
+                      "default": "NoIndentation",
+                      "description": "Multi-line pipeline style settings (default: NoIndentation).",
                       "enum": [
                         "IncreaseIndentationForFirstPipeline",
                         "IncreaseIndentationAfterEveryPipeline",
                         "NoIndentation",
                         "None"
                       ],
-                      "description": "Multi-line pipeline style settings (default: NoIndentation).",
-                      "default": "NoIndentation",
                       "type": "string"
-                    },
-                    "powershell.codeFormatting.whitespaceInsideBrace": {
-                      "description": "Adds a space after an opening brace ('{') and before a closing brace ('}').",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.codeFormatting.ignoreOneLineBlock": {
-                      "description": "Does not reformat one-line code blocks, such as \"if (...) {...} else {...}\".",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.codeFormatting.addWhitespaceAroundPipe": {
-                      "description": "Adds a space before and after the pipeline operator ('|') if it is missing.",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.codeFormatting.whitespaceAroundOperator": {
-                      "description": "Adds spaces before and after an operator ('=', '+', '-', etc.).",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.codeFormatting.autoCorrectAliases": {
-                      "description": "Replaces aliases with their aliased name.",
-                      "default": false,
-                      "type": "boolean"
-                    },
-                    "powershell.codeFormatting.newLineAfterCloseBrace": {
-                      "description": "Adds a newline (line break) after a closing brace.",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.codeFormatting.trimWhitespaceAroundPipe": {
-                      "description": "Trims extraneous whitespace (more than 1 character) before and after the pipeline operator ('|').",
-                      "default": false,
-                      "type": "boolean"
-                    },
-                    "powershell.helpCompletion": {
-                      "enum": [
-                        "Disabled",
-                        "BlockComment",
-                        "LineComment"
-                      ],
-                      "description": "Controls the comment-based help completion behavior triggered by typing '##'. Set the generated help style with 'BlockComment' or 'LineComment'. Disable the feature with 'Disabled'.",
-                      "default": "BlockComment",
-                      "type": "string"
-                    },
-                    "powershell.codeFormatting.openBraceOnSameLine": {
-                      "description": "Places open brace on the same line as its associated statement.",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.codeFormatting.whitespaceBeforeOpenBrace": {
-                      "description": "Adds a space between a keyword and its associated scriptblock expression.",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.enableProfileLoading": {
-                      "description": "Loads user and system-wide PowerShell profiles (profile.ps1 and Microsoft.VSCode_profile.ps1) into the PowerShell session. This affects IntelliSense and interactive script execution, but it does not affect the debugger.",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.codeFormatting.alignPropertyValuePairs": {
-                      "description": "Align assignment statements in a hashtable or a DSC Configuration.",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.codeFormatting.newLineAfterOpenBrace": {
-                      "description": "Adds a newline (line break) after an open brace.",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.scriptAnalysis.enable": {
-                      "description": "Enables real-time script analysis from PowerShell Script Analyzer. Uses the newest installed version of the PSScriptAnalyzer module or the version bundled with this extension, if it is newer.",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.codeFormatting.whitespaceBeforeOpenParen": {
-                      "description": "Adds a space between a keyword (if, elseif, while, switch, etc) and its associated conditional expression.",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.codeFormatting.whitespaceAfterSeparator": {
-                      "description": "Adds a space after a separator (',' and ';').",
-                      "default": true,
-                      "type": "boolean"
-                    },
-                    "powershell.useX86Host": {
-                      "description": "Uses the 32-bit language service on 64-bit Windows. This setting has no effect on 32-bit Windows or on the PowerShell extension debugger, which has its own architecture configuration.",
-                      "default": false,
-                      "type": "boolean"
-                    },
-                    "powershell.codeFormatting.useCorrectCasing": {
-                      "description": "Use correct casing for cmdlets.",
-                      "default": false,
-                      "type": "boolean"
                     },
                     "powershell.codeFormatting.preset": {
+                      "default": "Custom",
+                      "description": "Sets the codeformatting options to follow the given indent style in a way that is compatible with PowerShell syntax. For more information about the brace styles please refer to https://github.com/PoshCode/PowerShellPracticeAndStyle/issues/81.",
                       "enum": [
                         "Custom",
                         "Allman",
                         "OTBS",
                         "Stroustrup"
                       ],
-                      "description": "Sets the codeformatting options to follow the given indent style in a way that is compatible with PowerShell syntax. For more information about the brace styles please refer to https://github.com/PoshCode/PowerShellPracticeAndStyle/issues/81.",
-                      "default": "Custom",
                       "type": "string"
+                    },
+                    "powershell.codeFormatting.trimWhitespaceAroundPipe": {
+                      "default": false,
+                      "description": "Trims extraneous whitespace (more than 1 character) before and after the pipeline operator ('|').",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.useConstantStrings": {
+                      "default": false,
+                      "description": "Use single quotes if a string is not interpolated and its value does not contain a single quote.",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.useCorrectCasing": {
+                      "default": false,
+                      "description": "Use correct casing for cmdlets.",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.whitespaceAfterSeparator": {
+                      "default": true,
+                      "description": "Adds a space after a separator (',' and ';').",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.whitespaceAroundOperator": {
+                      "default": true,
+                      "description": "Adds spaces before and after an operator ('=', '+', '-', etc.).",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.whitespaceAroundPipe": {
+                      "default": true,
+                      "description": "REMOVED. Please use the \"powershell.codeFormatting.addWhitespaceAroundPipe\" setting instead. If you've used this setting before, we have moved it for you automatically.",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.whitespaceBeforeOpenBrace": {
+                      "default": true,
+                      "description": "Adds a space between a keyword and its associated scriptblock expression.",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.whitespaceBeforeOpenParen": {
+                      "default": true,
+                      "description": "Adds a space between a keyword (if, elseif, while, switch, etc) and its associated conditional expression.",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.whitespaceBetweenParameters": {
+                      "default": false,
+                      "description": "Removes redundant whitespace between parameters.",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.whitespaceInsideBrace": {
+                      "default": true,
+                      "description": "Adds a space after an opening brace ('{') and before a closing brace ('}').",
+                      "type": "boolean"
+                    },
+                    "powershell.enableProfileLoading": {
+                      "default": true,
+                      "description": "Loads user and system-wide PowerShell profiles (profile.ps1 and Microsoft.VSCode_profile.ps1) into the PowerShell session. This affects IntelliSense and interactive script execution, but it does not affect the debugger.",
+                      "type": "boolean"
+                    },
+                    "powershell.helpCompletion": {
+                      "default": "BlockComment",
+                      "description": "Controls the comment-based help completion behavior triggered by typing '##'. Set the generated help style with 'BlockComment' or 'LineComment'. Disable the feature with 'Disabled'.",
+                      "enum": [
+                        "Disabled",
+                        "BlockComment",
+                        "LineComment"
+                      ],
+                      "type": "string"
+                    },
+                    "powershell.scriptAnalysis.enable": {
+                      "default": true,
+                      "description": "Enables real-time script analysis from PowerShell Script Analyzer. Uses the newest installed version of the PSScriptAnalyzer module or the version bundled with this extension, if it is newer.",
+                      "type": "boolean"
+                    },
+                    "powershell.scriptAnalysis.settingsPath": {
+                      "default": "PSScriptAnalyzerSettings.psd1",
+                      "description": "Specifies the path to a PowerShell Script Analyzer settings file. To override the default settings for all projects, enter an absolute path, or enter a path relative to your workspace.",
+                      "type": "string"
+                    },
+                    "powershell.useX86Host": {
+                      "default": false,
+                      "description": "Uses the 32-bit language service on 64-bit Windows. This setting has no effect on 32-bit Windows or on the PowerShell extension debugger, which has its own architecture configuration.",
+                      "type": "boolean"
                     }
-                  },
-                  "additionalProperties": false
+                  }
                 }
               }
             }
           }
-        },
-        "file_patterns": [
-          "/LSP-PowerShellEditorServices.sublime-settings"
-        ]
+        }
       },
       {
+        "file_patterns": [
+          "/*.sublime-project"
+        ],
         "schema": {
           "properties": {
             "settings": {
@@ -175,10 +183,7 @@
               }
             }
           }
-        },
-        "file_patterns": [
-          "/*.sublime-project"
-        ]
+        }
       }
     ]
   }

@@ -6,7 +6,7 @@ import subprocess
 import tempfile
 
 from LSP.plugin import AbstractPlugin
-from LSP.plugin.core.typing import Any, Dict, Optional, Tuple, List
+from LSP.plugin.core.typing import Any, Tuple, List
 import sublime
 
 URL = "https://github.com/PowerShell/PowerShellEditorServices/releases/download/v{}/PowerShellEditorServices.zip"
@@ -77,7 +77,7 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def start_script(cls) -> str:
-        return os.path.join(cls.basedir(), cls.name(), "Start-EditorServices.ps1")
+        return os.path.join(cls.basedir(), "Start-EditorServices.ps1")
 
     @classmethod
     def host_version(cls) -> str:

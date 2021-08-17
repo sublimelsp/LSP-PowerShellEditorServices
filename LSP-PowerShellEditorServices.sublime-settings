@@ -3,19 +3,17 @@
 	// plugin decide.
 	// For Windows this is "powershell.exe", for macOS/Linux it's "pwsh".
 	"powershell_exe": "",
-	"version": "2.3.0",
+	"version": "2.4.7",
 	"selector": "source.powershell",
 	"initializationOptions": {},
 	"settings": {
-		// Adds a space before and after the pipeline operator ('|') if it is
-		// missing.
+		// Adds a space before and after the pipeline operator ('|') if it is missing.
 		"powershell.codeFormatting.addWhitespaceAroundPipe": true,
 		// Align assignment statements in a hashtable or a DSC Configuration.
 		"powershell.codeFormatting.alignPropertyValuePairs": true,
 		// Replaces aliases with their aliased name.
 		"powershell.codeFormatting.autoCorrectAliases": false,
-		// Does not reformat one-line code blocks, such as "if (...) {...} else
-		// {...}".
+		// Does not reformat one-line code blocks, such as "if (...) {...} else {...}".
 		"powershell.codeFormatting.ignoreOneLineBlock": true,
 		// Adds a newline (line break) after a closing brace.
 		"powershell.codeFormatting.newLineAfterCloseBrace": true,
@@ -26,17 +24,16 @@
 		// Multi-line pipeline style settings (default: NoIndentation).
 		// possible values: IncreaseIndentationForFirstPipeline, IncreaseIndentationAfterEveryPipeline, NoIndentation, None
 		"powershell.codeFormatting.pipelineIndentationStyle": "NoIndentation",
-		// Sets the codeformatting options to follow the given indent style in a
-		// way that is compatible with PowerShell syntax. For more information
-		// about the brace styles please refer to
-		// https://github.com/PoshCode/PowerShellPracticeAndStyle/issues/81.
+		// Sets the codeformatting options to follow the given indent style in a way that is
+		// compatible with PowerShell syntax. For more information about the brace styles please
+		// refer to https://github.com/PoshCode/PowerShellPracticeAndStyle/issues/81.
 		// possible values: Custom, Allman, OTBS, Stroustrup
 		"powershell.codeFormatting.preset": "Custom",
-		// Trims extraneous whitespace (more than 1 character) before and after
-		// the pipeline operator ('|').
+		// Trims extraneous whitespace (more than 1 character) before and after the pipeline
+		// operator ('|').
 		"powershell.codeFormatting.trimWhitespaceAroundPipe": false,
-		// Use single quotes if a string is not interpolated and its value does
-		// not contain a single quote.
+		// Use single quotes if a string is not interpolated and its value does not contain a single
+		// quote.
 		"powershell.codeFormatting.useConstantStrings": false,
 		// Use correct casing for cmdlets.
 		"powershell.codeFormatting.useCorrectCasing": false,
@@ -44,38 +41,38 @@
 		"powershell.codeFormatting.whitespaceAfterSeparator": true,
 		// Adds spaces before and after an operator ('=', '+', '-', etc.).
 		"powershell.codeFormatting.whitespaceAroundOperator": true,
-		// Adds a space between a keyword and its associated scriptblock
-		// expression.
+		// REMOVED. Please use the "powershell.codeFormatting.addWhitespaceAroundPipe" setting
+		// instead. If you've used this setting before, we have moved it for you automatically.
+		"powershell.codeFormatting.whitespaceAroundPipe": true,
+		// Adds a space between a keyword and its associated scriptblock expression.
 		"powershell.codeFormatting.whitespaceBeforeOpenBrace": true,
-		// Adds a space between a keyword (if, elseif, while, switch, etc) and
-		// its associated conditional expression.
+		// Adds a space between a keyword (if, elseif, while, switch, etc) and its associated
+		// conditional expression.
 		"powershell.codeFormatting.whitespaceBeforeOpenParen": true,
 		// Removes redundant whitespace between parameters.
 		"powershell.codeFormatting.whitespaceBetweenParameters": false,
-		// Adds a space after an opening brace ('{') and before a closing brace
-		// ('}').
+		// Adds a space after an opening brace ('{') and before a closing brace ('}').
 		"powershell.codeFormatting.whitespaceInsideBrace": true,
 		// Loads user and system-wide PowerShell profiles (profile.ps1 and
-		// Microsoft.VSCode_profile.ps1) into the PowerShell session. This
-		// affects IntelliSense and interactive script execution, but it does
-		// not affect the debugger.
+		// Microsoft.VSCode_profile.ps1) into the PowerShell session. This affects IntelliSense and
+		// interactive script execution, but it does not affect the debugger.
 		"powershell.enableProfileLoading": true,
-		// Controls the comment-based help completion behavior triggered by
-		// typing '##'. Set the generated help style with 'BlockComment' or
-		// 'LineComment'. Disable the feature with 'Disabled'.
+		// Controls the comment-based help completion behavior triggered by typing '##'. Set the
+		// generated help style with 'BlockComment' or 'LineComment'. Disable the feature with
+		// 'Disabled'.
 		// possible values: Disabled, BlockComment, LineComment
 		"powershell.helpCompletion": "BlockComment",
-		// Enables real-time script analysis from PowerShell Script Analyzer.
-		// Uses the newest installed version of the PSScriptAnalyzer module or
-		// the version bundled with this extension, if it is newer.
+		// Enables real-time script analysis from PowerShell Script Analyzer. Uses the newest
+		// installed version of the PSScriptAnalyzer module or the version bundled with this
+		// extension, if it is newer.
 		"powershell.scriptAnalysis.enable": true,
-		// Specifies the path to a PowerShell Script Analyzer settings file. To
-		// override the default settings for all projects, enter an absolute
-		// path, or enter a path relative to your workspace.
+		// Specifies the path to a PowerShell Script Analyzer settings file. To override the default
+		// settings for all projects, enter an absolute path, or enter a path relative to your
+		// workspace.
 		"powershell.scriptAnalysis.settingsPath": "PSScriptAnalyzerSettings.psd1",
-		// Uses the 32-bit language service on 64-bit Windows. This setting has
-		// no effect on 32-bit Windows or on the PowerShell extension debugger,
-		// which has its own architecture configuration.
+		// Uses the 32-bit language service on 64-bit Windows. This setting has no effect on 32-bit
+		// Windows or on the PowerShell extension debugger, which has its own architecture
+		// configuration.
 		"powershell.useX86Host": false,
 	}
 }
