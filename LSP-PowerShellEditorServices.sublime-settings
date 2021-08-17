@@ -5,6 +5,7 @@
 	"powershell_exe": "",
 	"version": "2.3.0",
 	"selector": "source.powershell",
+	"schemes": ["file", "buffer"],
 	"initializationOptions": {},
 	"settings": {
 		// Adds a space before and after the pipeline operator ('|') if it is
