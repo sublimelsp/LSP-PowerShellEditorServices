@@ -77,7 +77,7 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def start_script(cls) -> str:
-        return os.path.join(cls.basedir(), "Start-EditorServices.ps1")
+        return os.path.join(cls.basedir(), "PowerShellEditorServices", "Start-EditorServices.ps1")
 
     @classmethod
     def host_version(cls) -> str:
@@ -97,7 +97,13 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def dll_path(cls) -> str:
-        return os.path.join(cls.basedir(), cls.name(), "bin", "Common", "Microsoft.PowerShell.EditorServices.dll")
+        return os.path.join(
+            cls.basedir(),
+            "PowerShellEditorServices",
+            "bin",
+            "Common",
+            "Microsoft.PowerShell.EditorServices.dll"
+        )
 
     @classmethod
     def version_str(cls) -> str:
@@ -145,8 +151,7 @@ class PowerShellEditorServices(AbstractPlugin):
             zipfile = os.path.join(cls.storage_path(), "{}.zip".format(cls.name()))
             urlretrieve(URL.format(cls.version_str()), zipfile)
             with ZipFile(zipfile, "r") as f:
-                f.extractall(cls.storage_path())
-            os.rename(os.path.join(cls.storage_path(), cls.name()), cls.basedir())
+                f.extractall(cls.basedir())
             os.unlink(zipfile)
         except Exception:
             shutil.rmtree(cls.basedir(), ignore_errors=True)
