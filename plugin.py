@@ -30,8 +30,6 @@ class PowerShellEditorServices(AbstractPlugin):
     def get_windows_command(cls) -> List[str]:
         return [
             cls.powershell_exe(),
-            "-ExecutionPolicy",
-            "Bypass",
             "-NoLogo",
             "-NoProfile",
             "-File",
