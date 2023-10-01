@@ -1,13 +1,17 @@
-from urllib.request import urlretrieve
-from zipfile import ZipFile
 import os
 import shutil
 import subprocess
 import tempfile
 
-from LSP.plugin import AbstractPlugin
-from LSP.plugin.core.typing import Any, Tuple, List
+from urllib.request import urlretrieve
+from zipfile import ZipFile
+
 import sublime
+
+from LSP.plugin import AbstractPlugin
+from LSP.plugin import ClientConfig
+from LSP.plugin import WorkspaceFolder
+from LSP.plugin.core.typing import Any, List, Optional
 
 URL = "https://github.com/PowerShell/PowerShellEditorServices/releases/download/v{}/PowerShellEditorServices.zip"
 
@@ -16,15 +20,6 @@ class PowerShellEditorServices(AbstractPlugin):
     @classmethod
     def name(cls) -> str:
         return cls.__name__
-
-    @classmethod
-    def configuration(cls) -> Tuple[sublime.Settings, str]:
-        settings, file_path = super().configuration()
-        if sublime.platform() == "windows":
-            settings.set("command", cls.get_windows_command())
-        else:
-            settings.set("command", cls.get_unix_command())
-        return settings, file_path
 
     @classmethod
     def get_windows_command(cls) -> List[str]:
@@ -156,6 +151,17 @@ class PowerShellEditorServices(AbstractPlugin):
         except Exception:
             shutil.rmtree(cls.basedir(), ignore_errors=True)
             raise
+
+    @classmethod
+    def on_pre_start(cls, window: sublime.Window, initiating_view: sublime.View,
+                     workspace_folders: List[WorkspaceFolder], configuration: ClientConfig) -> Optional[str]:
+        if not configuration.command:
+            if sublime.platform() == "windows":
+                configuration.command = cls.get_windows_command()
+            else:
+                configuration.command = cls.get_unix_command()
+
+        return super().on_pre_start(window, initiating_view, workspace_folders, configuration)
 
     def m_powerShell_executionStatusChanged(self, params: Any) -> None:
         pass
