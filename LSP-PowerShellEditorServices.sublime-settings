@@ -6,6 +6,10 @@
 	"version": "3.8.0",
 	"selector": "source.powershell",
 	"schemes": ["file", "buffer"],
+	"disabled_capabilities": {
+		// folding ranges are not supported by ST
+		"foldingRangeProvider": true
+	},
 	"initializationOptions": {},
 	"settings": {
 		// Adds a space before and after the pipeline operator ('|') if it is missing.
