@@ -32,6 +32,8 @@ class PowerShellEditorServices(AbstractPlugin):
             cls.powershell_exe(),
             "-ExecutionPolicy",
             "Bypass",
+            "-NoLogo",
+            "-NoProfile",
             "-File",
             cls.start_script(),
             "-BundledModulesPath",
@@ -53,6 +55,8 @@ class PowerShellEditorServices(AbstractPlugin):
     def get_unix_command(cls) -> List[str]:
         return [
             cls.powershell_exe(),
+            "-NoLogo",
+            "-NoProfile",
             cls.start_script(),
             "-BundledModulesPath",
             cls.bundled_modules_path(),
