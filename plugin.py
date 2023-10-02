@@ -153,15 +153,15 @@ class PowerShellEditorServices(AbstractPlugin):
             raise
 
     @classmethod
-    def on_pre_start(cls, window: sublime.Window, initiating_view: sublime.View,
-                     workspace_folders: List[WorkspaceFolder], configuration: ClientConfig) -> Optional[str]:
+    def can_start(cls, window: sublime.Window, initiating_view: sublime.View,
+                  workspace_folders: List[WorkspaceFolder], configuration: ClientConfig) -> Optional[str]:
         if not configuration.command:
             if sublime.platform() == "windows":
                 configuration.command = cls.get_windows_command()
             else:
                 configuration.command = cls.get_unix_command()
 
-        return super().on_pre_start(window, initiating_view, workspace_folders, configuration)
+        return super().can_start(window, initiating_view, workspace_folders, configuration)
 
     def m_powerShell_executionStatusChanged(self, params: Any) -> None:
         pass
