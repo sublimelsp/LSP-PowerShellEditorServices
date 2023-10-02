@@ -11,7 +11,9 @@ import sublime
 from LSP.plugin import AbstractPlugin
 from LSP.plugin import ClientConfig
 from LSP.plugin import WorkspaceFolder
-from LSP.plugin.core.typing import Any, List, Optional
+from LSP.plugin.core.protocol import Location
+from LSP.plugin.core.typing import Any, Callable, List, Mapping, Optional
+from LSP.plugin.locationpicker import LocationPicker
 
 URL = "https://github.com/PowerShell/PowerShellEditorServices/releases/download/v{}/PowerShellEditorServices.zip"
 
@@ -59,6 +61,15 @@ class PowerShellEditorServices(AbstractPlugin):
                 configuration.command = cls.get_unix_command()
 
         return super().can_start(window, initiating_view, workspace_folders, configuration)
+
+    def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
+        command_name = command['command']
+        if command_name == 'editor.action.showReferences':
+            _, _, references = command['arguments']
+            self._handle_show_references(references)
+            done_callback()
+            return True
+        return False
 
     def m_powerShell_executionStatusChanged(self, params: Any) -> None:
         pass
@@ -172,3 +183,23 @@ class PowerShellEditorServices(AbstractPlugin):
         else:
             startupinfo = None
         return subprocess.check_output(args=args, cwd=kwargs.get("cwd"), startupinfo=startupinfo)
+
+    def _handle_show_references(self, references: List[Location]) -> None:
+        session = self.weaksession()
+        if not session:
+            return
+        view = sublime.active_window().active_view()
+        if not view:
+            return
+        if len(references) == 1:
+            args = {
+                'location': references[0],
+                'session_name': session.config.name,
+            }
+            window = view.window()
+            if window:
+                window.run_command('lsp_open_location', args)
+        elif references:
+            LocationPicker(view, session, references, side_by_side=False)
+        else:
+            sublime.status_message('No references found')
