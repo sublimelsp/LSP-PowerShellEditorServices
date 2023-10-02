@@ -29,8 +29,12 @@ class PowerShellEditorServices(AbstractPlugin):
     @classmethod
     def needs_update_or_installation(cls) -> bool:
         try:
+            powershell_exe = cls.powershell_exe()
+            if not powershell_exe:
+                # Install only, if powershell is available!
+                return False
             cmd = '[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{}").FileVersion'.format(cls.dll_path())
-            version_info = cls.run(cls.powershell_exe(), "-Command", cmd).decode('ascii')
+            version_info = cls.run(powershell_exe, "-Command", cmd).decode('ascii')
             version_info = ".".join(version_info.splitlines()[0].strip().split('.')[0:3])
             return cls.version_str() != version_info
         except Exception:
@@ -54,32 +58,12 @@ class PowerShellEditorServices(AbstractPlugin):
     @classmethod
     def can_start(cls, window: sublime.Window, initiating_view: sublime.View,
                   workspace_folders: List[WorkspaceFolder], configuration: ClientConfig) -> Optional[str]:
-        if not configuration.command:
-            if sublime.platform() == "windows":
-                configuration.command = cls.get_windows_command()
-            else:
-                configuration.command = cls.get_unix_command()
+        powershell_exe = cls.powershell_exe()
+        if not powershell_exe:
+            return "PowerShell is required to run {}!".format(cls.name())
 
-        return super().can_start(window, initiating_view, workspace_folders, configuration)
-
-    def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
-        command_name = command['command']
-        if command_name == 'editor.action.showReferences':
-            _, _, references = command['arguments']
-            self._handle_show_references(references)
-            done_callback()
-            return True
-        return False
-
-    def m_powerShell_executionStatusChanged(self, params: Any) -> None:
-        pass
-
-    # ---- internal methods -----
-
-    @classmethod
-    def get_windows_command(cls) -> List[str]:
-        return [
-            cls.powershell_exe(),
+        configuration.command = [
+            powershell_exe,
             "-NoLogo",
             "-NoProfile",
             "-File",
@@ -99,29 +83,21 @@ class PowerShellEditorServices(AbstractPlugin):
             cls.session_details_path(),
         ]
 
-    @classmethod
-    def get_unix_command(cls) -> List[str]:
-        return [
-            cls.powershell_exe(),
-            "-NoLogo",
-            "-NoProfile",
-            cls.start_script(),
-            "-BundledModulesPath",
-            cls.bundled_modules_path(),
-            "-HostName",
-            "SublimeText",
-            "-HostProfileId",
-            "SublimeText",
-            "-HostVersion",
-            cls.host_version(),
-            "-Stdio",
-            "-LogPath",
-            cls.log_path(),
-            "-SessionDetailsPath",
-            cls.session_details_path(),
-            "-FeatureFlags",
-            "PSReadLine"
-        ]
+        return super().can_start(window, initiating_view, workspace_folders, configuration)
+
+    def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
+        command_name = command['command']
+        if command_name == 'editor.action.showReferences':
+            _, _, references = command['arguments']
+            self._handle_show_references(references)
+            done_callback()
+            return True
+        return False
+
+    def m_powerShell_executionStatusChanged(self, params: Any) -> None:
+        pass
+
+    # ---- internal methods -----
 
     @classmethod
     def basedir(cls) -> str:
@@ -166,13 +142,15 @@ class PowerShellEditorServices(AbstractPlugin):
     def powershell_exe(cls) -> str:
         settings = sublime.load_settings("LSP-{}.sublime-settings".format(cls.name()))
         powershell_exe = settings.get("powershell_exe")
-        if isinstance(powershell_exe, str) and powershell_exe:
-            return powershell_exe
-        return {
-            "linux": "pwsh",
-            "windows": "powershell.exe",
-            "osx": "pwsh"
-        }[sublime.platform()]
+        if not powershell_exe or not isinstance(powershell_exe, str):
+            powershell_exe = "pwsh"
+            if not shutil.which(powershell_exe):
+                if sublime.platform() == "windows":
+                    powershell_exe = "powershell.exe"
+                else:
+                    powershell_exe = ""
+
+        return powershell_exe
 
     @classmethod
     def run(cls, *args: Any, **kwargs: Any) -> bytes:
