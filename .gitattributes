@@ -9,3 +9,4 @@
 /.gitattributes     export-ignore
 /.gitignore         export-ignore
 /setup.cfg          export-ignore
+/test.ps1			export-ignore
