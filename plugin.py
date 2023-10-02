@@ -92,6 +92,12 @@ class PowerShellEditorServices(AbstractPlugin):
             self._handle_show_references(references)
             done_callback()
             return True
+
+        if command_name == 'PowerShell.ShowCodeActionDocumentation':
+            self._handle_show_rule_documentation(command['arguments'][0])
+            done_callback()
+            return True
+
         return False
 
     def m_powerShell_executionStatusChanged(self, params: Any) -> None:
@@ -181,3 +187,15 @@ class PowerShellEditorServices(AbstractPlugin):
             LocationPicker(view, session, references, side_by_side=False)
         else:
             sublime.status_message('No references found')
+
+    def _handle_show_rule_documentation(self, rule_id: str) -> None:
+        if not rule_id:
+            return
+
+        if rule_id.startswith("PS"):
+            rule_id = rule_id[2:]
+
+        sublime.run_command(
+            "open_url",
+            {"url": "https://docs.microsoft.com/powershell/utility-modules/psscriptanalyzer/rules/" + rule_id}
+        )
