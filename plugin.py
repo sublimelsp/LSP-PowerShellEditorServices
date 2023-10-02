@@ -11,15 +11,70 @@ import sublime
 from LSP.plugin import AbstractPlugin
 from LSP.plugin import ClientConfig
 from LSP.plugin import WorkspaceFolder
-from LSP.plugin.core.typing import Any, List, Optional
+from LSP.plugin.core.protocol import Location
+from LSP.plugin.core.typing import Any, Callable, List, Mapping, Optional
+from LSP.plugin.locationpicker import LocationPicker
 
 URL = "https://github.com/PowerShell/PowerShellEditorServices/releases/download/v{}/PowerShellEditorServices.zip"
 
 
 class PowerShellEditorServices(AbstractPlugin):
+
+    # ---- public API methods ----
+
     @classmethod
     def name(cls) -> str:
         return cls.__name__
+
+    @classmethod
+    def needs_update_or_installation(cls) -> bool:
+        try:
+            cmd = '[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{}").FileVersion'.format(cls.dll_path())
+            version_info = cls.run(cls.powershell_exe(), "-Command", cmd).decode('ascii')
+            version_info = ".".join(version_info.splitlines()[0].strip().split('.')[0:3])
+            return cls.version_str() != version_info
+        except Exception:
+            pass
+        return True
+
+    @classmethod
+    def install_or_update(cls) -> None:
+        shutil.rmtree(cls.basedir(), ignore_errors=True)
+        os.makedirs(cls.storage_path(), exist_ok=True)
+        try:
+            zipfile = os.path.join(cls.storage_path(), "{}.zip".format(cls.name()))
+            urlretrieve(URL.format(cls.version_str()), zipfile)
+            with ZipFile(zipfile, "r") as f:
+                f.extractall(cls.basedir())
+            os.unlink(zipfile)
+        except Exception:
+            shutil.rmtree(cls.basedir(), ignore_errors=True)
+            raise
+
+    @classmethod
+    def can_start(cls, window: sublime.Window, initiating_view: sublime.View,
+                  workspace_folders: List[WorkspaceFolder], configuration: ClientConfig) -> Optional[str]:
+        if not configuration.command:
+            if sublime.platform() == "windows":
+                configuration.command = cls.get_windows_command()
+            else:
+                configuration.command = cls.get_unix_command()
+
+        return super().can_start(window, initiating_view, workspace_folders, configuration)
+
+    def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
+        command_name = command['command']
+        if command_name == 'editor.action.showReferences':
+            _, _, references = command['arguments']
+            self._handle_show_references(references)
+            done_callback()
+            return True
+        return False
+
+    def m_powerShell_executionStatusChanged(self, params: Any) -> None:
+        pass
+
+    # ---- internal methods -----
 
     @classmethod
     def get_windows_command(cls) -> List[str]:
@@ -129,41 +184,22 @@ class PowerShellEditorServices(AbstractPlugin):
             startupinfo = None
         return subprocess.check_output(args=args, cwd=kwargs.get("cwd"), startupinfo=startupinfo)
 
-    @classmethod
-    def needs_update_or_installation(cls) -> bool:
-        try:
-            cmd = '[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{}").FileVersion'.format(cls.dll_path())
-            version_info = cls.run(cls.powershell_exe(), "-Command", cmd).decode('ascii')
-            version_info = ".".join(version_info.splitlines()[0].strip().split('.')[0:3])
-            return cls.version_str() != version_info
-        except Exception:
-            pass
-        return True
-
-    @classmethod
-    def install_or_update(cls) -> None:
-        shutil.rmtree(cls.basedir(), ignore_errors=True)
-        os.makedirs(cls.storage_path(), exist_ok=True)
-        try:
-            zipfile = os.path.join(cls.storage_path(), "{}.zip".format(cls.name()))
-            urlretrieve(URL.format(cls.version_str()), zipfile)
-            with ZipFile(zipfile, "r") as f:
-                f.extractall(cls.basedir())
-            os.unlink(zipfile)
-        except Exception:
-            shutil.rmtree(cls.basedir(), ignore_errors=True)
-            raise
-
-    @classmethod
-    def can_start(cls, window: sublime.Window, initiating_view: sublime.View,
-                  workspace_folders: List[WorkspaceFolder], configuration: ClientConfig) -> Optional[str]:
-        if not configuration.command:
-            if sublime.platform() == "windows":
-                configuration.command = cls.get_windows_command()
-            else:
-                configuration.command = cls.get_unix_command()
-
-        return super().can_start(window, initiating_view, workspace_folders, configuration)
-
-    def m_powerShell_executionStatusChanged(self, params: Any) -> None:
-        pass
+    def _handle_show_references(self, references: List[Location]) -> None:
+        session = self.weaksession()
+        if not session:
+            return
+        view = sublime.active_window().active_view()
+        if not view:
+            return
+        if len(references) == 1:
+            args = {
+                'location': references[0],
+                'session_name': session.config.name,
+            }
+            window = view.window()
+            if window:
+                window.run_command('lsp_open_location', args)
+        elif references:
+            LocationPicker(view, session, references, side_by_side=False)
+        else:
+            sublime.status_message('No references found')
