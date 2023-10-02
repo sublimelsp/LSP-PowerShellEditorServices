@@ -54,31 +54,7 @@ class PowerShellEditorServices(AbstractPlugin):
     @classmethod
     def can_start(cls, window: sublime.Window, initiating_view: sublime.View,
                   workspace_folders: List[WorkspaceFolder], configuration: ClientConfig) -> Optional[str]:
-        if not configuration.command:
-            if sublime.platform() == "windows":
-                configuration.command = cls.get_windows_command()
-            else:
-                configuration.command = cls.get_unix_command()
-
-        return super().can_start(window, initiating_view, workspace_folders, configuration)
-
-    def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
-        command_name = command['command']
-        if command_name == 'editor.action.showReferences':
-            _, _, references = command['arguments']
-            self._handle_show_references(references)
-            done_callback()
-            return True
-        return False
-
-    def m_powerShell_executionStatusChanged(self, params: Any) -> None:
-        pass
-
-    # ---- internal methods -----
-
-    @classmethod
-    def get_windows_command(cls) -> List[str]:
-        return [
+        configuration.command = [
             cls.powershell_exe(),
             "-NoLogo",
             "-NoProfile",
@@ -99,29 +75,21 @@ class PowerShellEditorServices(AbstractPlugin):
             cls.session_details_path(),
         ]
 
-    @classmethod
-    def get_unix_command(cls) -> List[str]:
-        return [
-            cls.powershell_exe(),
-            "-NoLogo",
-            "-NoProfile",
-            cls.start_script(),
-            "-BundledModulesPath",
-            cls.bundled_modules_path(),
-            "-HostName",
-            "SublimeText",
-            "-HostProfileId",
-            "SublimeText",
-            "-HostVersion",
-            cls.host_version(),
-            "-Stdio",
-            "-LogPath",
-            cls.log_path(),
-            "-SessionDetailsPath",
-            cls.session_details_path(),
-            "-FeatureFlags",
-            "PSReadLine"
-        ]
+        return super().can_start(window, initiating_view, workspace_folders, configuration)
+
+    def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
+        command_name = command['command']
+        if command_name == 'editor.action.showReferences':
+            _, _, references = command['arguments']
+            self._handle_show_references(references)
+            done_callback()
+            return True
+        return False
+
+    def m_powerShell_executionStatusChanged(self, params: Any) -> None:
+        pass
+
+    # ---- internal methods -----
 
     @classmethod
     def basedir(cls) -> str:
