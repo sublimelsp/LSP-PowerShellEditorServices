@@ -34,7 +34,7 @@ class PowerShellEditorServices(AbstractPlugin):
                 # Install only, if powershell is available!
                 return False
             cmd = '[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{}").FileVersion'.format(cls.dll_path())
-            version_info = cls.run(powershell_exe, "-Command", cmd).decode('ascii')
+            version_info = cls.run(powershell_exe, "-NoLogo", "-NoProfile", "-Command", cmd).decode('ascii')
             version_info = ".".join(version_info.splitlines()[0].strip().split('.')[0:3])
             return cls.version_str() != version_info
         except Exception:
