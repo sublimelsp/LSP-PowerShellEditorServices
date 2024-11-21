@@ -161,12 +161,12 @@ class PowerShellEditorServices(AbstractPlugin):
     @classmethod
     def run(cls, *args: Any, **kwargs: Any) -> bytes:
         if sublime.platform() == "windows":
-            startupinfo = subprocess.STARTUPINFO()  # type: ignore
-            flag = subprocess.STARTF_USESHOWWINDOW  # type: ignore
-            startupinfo.dwFlags |= flag
+            startupinfo = subprocess.STARTUPINFO()
+            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+            startupinfo.wShowWindow = subprocess.SW_HIDE
         else:
             startupinfo = None
-        return subprocess.check_output(args=args, cwd=kwargs.get("cwd"), startupinfo=startupinfo)
+        return subprocess.check_output(args=args, cwd=kwargs.get("cwd"), startupinfo=startupinfo, timeout=10.0)
 
     def _handle_show_references(self, references: List[Location]) -> None:
         session = self.weaksession()
