@@ -3,7 +3,11 @@
 	// plugin decide.
 	// For Windows this is "powershell.exe", for macOS/Linux it's "pwsh".
 	"powershell_exe": "",
-	"version": "4.3.0",
+
+	// The language server version to install. Valid values are fixed versions like `4.3.0` or `latest`.
+	// If `latest` is specified, automatic updates check are performed once a week.
+	"version": "latest",
+
 	"selector": "source.powershell",
 	"schemes": ["file", "buffer"],
 	"initializationOptions": {},

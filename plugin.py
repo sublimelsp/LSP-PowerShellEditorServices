@@ -1,13 +1,14 @@
 from __future__ import annotations
 import contextlib
+import json
 import os
 import shutil
-import subprocess
 import tempfile
+import time
 
 from io import BytesIO
 from typing import Any, Callable
-from urllib.request import urlopen
+from urllib.request import urlopen, Request as HttpRequest
 from zipfile import ZipFile
 
 import sublime
@@ -26,7 +27,21 @@ from LSP.plugin.locationpicker import LocationPicker
 class PowerShellEditorServices(AbstractPlugin):
     package_name: str = __spec__.parent
     """
-    The real package name on file system.
+    The package name on file system.
+
+    Main purpose is to provide python version acnostic package name for use
+    in path sensitive locations, to ensure plugin even works if user installs
+    package with different name.
+    """
+
+    server_version: str = ""
+    """
+    The language server version to use.
+    """
+
+    settings: sublime.Settings
+    """
+    Package settings
     """
 
     # ---- public API methods ----
@@ -36,19 +51,42 @@ class PowerShellEditorServices(AbstractPlugin):
         return cls.__name__
 
     @classmethod
+    def configuration(cls):
+        settings_file_name = f"LSP-{cls.name()}.sublime-settings"
+        cls.settings = sublime.load_settings(settings_file_name)
+        return cls.settings, f"Packages/{cls.package_name}/{settings_file_name}"
+
+    @classmethod
     def needs_update_or_installation(cls) -> bool:
-        try:
-            powershell_exe = cls.powershell_exe()
-            if not powershell_exe:
-                # Install only, if powershell is available!
-                return False
-            cmd = f'[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{cls.dll_path()}").FileVersion'
-            version_info = cls.run(powershell_exe, "-NoLogo", "-NoProfile", "-Command", cmd)
-            version_info = ".".join(version_info.splitlines()[0].strip().split(".")[0:3])
-            return cls.version_str() != version_info
-        except Exception:
-            pass
-        return True
+        server_file = cls.start_script()
+        is_upgrade = os.path.isfile(server_file)
+        if is_upgrade:
+            next_update_check, server_version = cls.load_metadata()
+        else:
+            next_update_check, server_version = 0, ""
+
+        cls.server_version = str(cls.settings.get("version", "latest"))
+        if cls.server_version[0] == "v":
+            cls.server_version = cls.server_version[1:]
+
+        if cls.server_version == "latest":
+            if int(time.time()) >= next_update_check:
+                try:
+                    # response url ends with latest available version number
+                    request = HttpRequest(url=f"{cls.repo_url()}/releases/latest", method="HEAD")
+                    with contextlib.closing(urlopen(request)) as response:
+                        available_version = response.url.rstrip("/").rsplit("/", 1)[1]
+                        if available_version[0] == "v":
+                            available_version = available_version[1:]
+                        if available_version != server_version:
+                            cls.server_version = available_version
+                            return True
+                except Exception:
+                    cls.save_metadata(False, server_version)
+
+            return False
+
+        return cls.server_version != server_version
 
     @classmethod
     def install_or_update(cls) -> None:
@@ -63,6 +101,8 @@ class PowerShellEditorServices(AbstractPlugin):
             cls.remove_basedir()
             raise
 
+        cls.save_metadata(True, cls.server_version)
+
     @classmethod
     def can_start(
         cls,
@@ -71,12 +111,21 @@ class PowerShellEditorServices(AbstractPlugin):
         workspace_folders: list[WorkspaceFolder],
         configuration: ClientConfig,
     ) -> str | None:
-        powershell_exe = cls.powershell_exe()
-        if not powershell_exe:
+        # find powershell executable
+        powershell = configuration.settings.get("powershell_exe")
+        if not powershell or not isinstance(powershell, str):
+            powershell = "pwsh"
+            if not shutil.which(powershell):
+                if sublime.platform() == "windows":
+                    powershell = "powershell.exe"
+                else:
+                    powershell = ""
+
+        if not powershell:
             return f"PowerShell is required to run {cls.name()}!"
 
         configuration.command = [
-            powershell_exe,
+            powershell,
             "-NoLogo",
             "-NoProfile",
             "-File",
@@ -148,7 +197,9 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def download_url(cls) -> str:
-        return f"{cls.repo_url()}/releases/download/v{cls.server_version()}/PowerShellEditorServices.zip"
+        return (
+            f"{cls.repo_url()}/releases/download/v{cls.server_version}/PowerShellEditorServices.zip"
+        )
 
     @classmethod
     def basedir(cls) -> str:
@@ -175,45 +226,29 @@ class PowerShellEditorServices(AbstractPlugin):
         return cls.basedir()
 
     @classmethod
-    def dll_path(cls) -> str:
-        return os.path.join(
-            cls.basedir(),
-            "PowerShellEditorServices",
-            "bin",
-            "Common",
-            "Microsoft.PowerShell.EditorServices.dll",
-        )
+    def metadata_file(cls) -> str:
+        return os.path.join(cls.basedir(), "update.json")
 
     @classmethod
-    def version_str(cls) -> str:
-        settings, _ = cls.configuration()
-        return str(settings.get("version"))
+    def load_metadata(cls) -> tuple[int, str]:
+        try:
+            with open(cls.metadata_file()) as fobj:
+                data = json.load(fobj)
+                return int(data["timestamp"]), data["version"]
+        except (FileNotFoundError, KeyError, TypeError, ValueError):
+            return 0, ""
 
     @classmethod
-    def powershell_exe(cls) -> str:
-        settings, _ = cls.configuration()
-        powershell_exe = settings.get("powershell_exe")
-        if not powershell_exe or not isinstance(powershell_exe, str):
-            powershell_exe = "pwsh"
-            if not shutil.which(powershell_exe):
-                if sublime.platform() == "windows":
-                    powershell_exe = "powershell.exe"
-                else:
-                    powershell_exe = ""
-
-        return powershell_exe
-
-    @classmethod
-    def run(cls, *args: Any, **kwargs: Any) -> str:
-        if sublime.platform() == "windows":
-            startupinfo = subprocess.STARTUPINFO()
-            startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-            startupinfo.wShowWindow = subprocess.SW_HIDE
-        else:
-            startupinfo = None
-        return subprocess.check_output(
-            args=args, cwd=kwargs.get("cwd"), startupinfo=startupinfo, timeout=10.0, encoding="utf-8"
-        )
+    def save_metadata(cls, success: bool, version: str) -> None:
+        next_run_delay = (7 * 24 * 60 * 60) if success else (6 * 60 * 60)
+        with open(cls.metadata_file(), "w") as fobj:
+            json.dump(
+                {
+                    "timestamp": int(time.time()) + next_run_delay,
+                    "version": version,
+                },
+                fp=fobj,
+            )
 
     def _handle_show_references(self, references: list[Location]) -> None:
         session = self.weaksession()
