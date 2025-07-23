@@ -33,9 +33,7 @@ class PowerShellEditorServices(AbstractPlugin):
             if not powershell_exe:
                 # Install only, if powershell is available!
                 return False
-            cmd = '[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{}").FileVersion'.format(
-                cls.dll_path()
-            )
+            cmd = f'[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{cls.dll_path()}").FileVersion'
             version_info = cls.run(
                 powershell_exe, "-NoLogo", "-NoProfile", "-Command", cmd
             ).decode("ascii")
@@ -52,7 +50,7 @@ class PowerShellEditorServices(AbstractPlugin):
         shutil.rmtree(cls.basedir(), ignore_errors=True)
         os.makedirs(cls.storage_path(), exist_ok=True)
         try:
-            zipfile = os.path.join(cls.storage_path(), "{}.zip".format(cls.name()))
+            zipfile = os.path.join(cls.storage_path(), f"{cls.name()}.zip")
             urlretrieve(URL.format(cls.version_str()), zipfile)
             with ZipFile(zipfile, "r") as f:
                 f.extractall(cls.basedir())
@@ -71,7 +69,7 @@ class PowerShellEditorServices(AbstractPlugin):
     ) -> Optional[str]:
         powershell_exe = cls.powershell_exe()
         if not powershell_exe:
-            return "PowerShell is required to run {}!".format(cls.name())
+            return f"PowerShell is required to run {cls.name()}!"
 
         configuration.command = [
             powershell_exe,
@@ -122,7 +120,7 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def basedir(cls) -> str:
-        return os.path.join(cls.storage_path(), "LSP-{}".format(cls.name()))
+        return os.path.join(cls.storage_path(), f"LSP-{cls.name()}")
 
     @classmethod
     def start_script(cls) -> str:
@@ -132,15 +130,15 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def host_version(cls) -> str:
-        return "{}.0.0".format(sublime.version())
+        return f"{sublime.version()}.0.0"
 
     @classmethod
     def session_details_path(cls) -> str:
-        return os.path.join(tempfile.gettempdir(), "{}.json".format(cls.name()))
+        return os.path.join(tempfile.gettempdir(), f"{cls.name()}.json")
 
     @classmethod
     def log_path(cls) -> str:
-        return os.path.join(tempfile.gettempdir(), "{}.log".format(cls.name()))
+        return os.path.join(tempfile.gettempdir(), f"{cls.name()}.log")
 
     @classmethod
     def bundled_modules_path(cls) -> str:
@@ -158,12 +156,12 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def version_str(cls) -> str:
-        settings = sublime.load_settings("LSP-{}.sublime-settings".format(cls.name()))
+        settings, _ = cls.configuration()
         return str(settings.get("version"))
 
     @classmethod
     def powershell_exe(cls) -> str:
-        settings = sublime.load_settings("LSP-{}.sublime-settings".format(cls.name()))
+        settings, _ = cls.configuration()
         powershell_exe = settings.get("powershell_exe")
         if not powershell_exe or not isinstance(powershell_exe, str):
             powershell_exe = "pwsh"
