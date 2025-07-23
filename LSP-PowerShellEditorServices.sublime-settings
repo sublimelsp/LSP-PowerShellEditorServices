@@ -3,7 +3,7 @@
 	// plugin decide.
 	// For Windows this is "powershell.exe", for macOS/Linux it's "pwsh".
 	"powershell_exe": "",
-	"version": "4.2.0",
+	"version": "4.3.0",
 	"selector": "source.powershell",
 	"schemes": ["file", "buffer"],
 	"initializationOptions": {},
