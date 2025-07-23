@@ -33,9 +33,15 @@ class PowerShellEditorServices(AbstractPlugin):
             if not powershell_exe:
                 # Install only, if powershell is available!
                 return False
-            cmd = '[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{}").FileVersion'.format(cls.dll_path())
-            version_info = cls.run(powershell_exe, "-NoLogo", "-NoProfile", "-Command", cmd).decode('ascii')
-            version_info = ".".join(version_info.splitlines()[0].strip().split('.')[0:3])
+            cmd = '[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{}").FileVersion'.format(
+                cls.dll_path()
+            )
+            version_info = cls.run(
+                powershell_exe, "-NoLogo", "-NoProfile", "-Command", cmd
+            ).decode("ascii")
+            version_info = ".".join(
+                version_info.splitlines()[0].strip().split(".")[0:3]
+            )
             return cls.version_str() != version_info
         except Exception:
             pass
@@ -56,8 +62,13 @@ class PowerShellEditorServices(AbstractPlugin):
             raise
 
     @classmethod
-    def can_start(cls, window: sublime.Window, initiating_view: sublime.View,
-                  workspace_folders: List[WorkspaceFolder], configuration: ClientConfig) -> Optional[str]:
+    def can_start(
+        cls,
+        window: sublime.Window,
+        initiating_view: sublime.View,
+        workspace_folders: List[WorkspaceFolder],
+        configuration: ClientConfig,
+    ) -> Optional[str]:
         powershell_exe = cls.powershell_exe()
         if not powershell_exe:
             return "PowerShell is required to run {}!".format(cls.name())
@@ -83,18 +94,22 @@ class PowerShellEditorServices(AbstractPlugin):
             cls.session_details_path(),
         ]
 
-        return super().can_start(window, initiating_view, workspace_folders, configuration)
+        return super().can_start(
+            window, initiating_view, workspace_folders, configuration
+        )
 
-    def on_pre_server_command(self, command: Mapping[str, Any], done_callback: Callable[[], None]) -> bool:
-        command_name = command['command']
-        if command_name == 'editor.action.showReferences':
-            _, _, references = command['arguments']
+    def on_pre_server_command(
+        self, command: Mapping[str, Any], done_callback: Callable[[], None]
+    ) -> bool:
+        command_name = command["command"]
+        if command_name == "editor.action.showReferences":
+            _, _, references = command["arguments"]
             self._handle_show_references(references)
             done_callback()
             return True
 
-        if command_name == 'PowerShell.ShowCodeActionDocumentation':
-            self._handle_show_rule_documentation(command['arguments'][0])
+        if command_name == "PowerShell.ShowCodeActionDocumentation":
+            self._handle_show_rule_documentation(command["arguments"][0])
             done_callback()
             return True
 
@@ -111,7 +126,9 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def start_script(cls) -> str:
-        return os.path.join(cls.basedir(), "PowerShellEditorServices", "Start-EditorServices.ps1")
+        return os.path.join(
+            cls.basedir(), "PowerShellEditorServices", "Start-EditorServices.ps1"
+        )
 
     @classmethod
     def host_version(cls) -> str:
@@ -136,7 +153,7 @@ class PowerShellEditorServices(AbstractPlugin):
             "PowerShellEditorServices",
             "bin",
             "Common",
-            "Microsoft.PowerShell.EditorServices.dll"
+            "Microsoft.PowerShell.EditorServices.dll",
         )
 
     @classmethod
@@ -166,7 +183,9 @@ class PowerShellEditorServices(AbstractPlugin):
             startupinfo.wShowWindow = subprocess.SW_HIDE
         else:
             startupinfo = None
-        return subprocess.check_output(args=args, cwd=kwargs.get("cwd"), startupinfo=startupinfo, timeout=10.0)
+        return subprocess.check_output(
+            args=args, cwd=kwargs.get("cwd"), startupinfo=startupinfo, timeout=10.0
+        )
 
     def _handle_show_references(self, references: List[Location]) -> None:
         session = self.weaksession()
@@ -177,16 +196,16 @@ class PowerShellEditorServices(AbstractPlugin):
             return
         if len(references) == 1:
             args = {
-                'location': references[0],
-                'session_name': session.config.name,
+                "location": references[0],
+                "session_name": session.config.name,
             }
             window = view.window()
             if window:
-                window.run_command('lsp_open_location', args)
+                window.run_command("lsp_open_location", args)
         elif references:
             LocationPicker(view, session, references, side_by_side=False)
         else:
-            sublime.status_message('No references found')
+            sublime.status_message("No references found")
 
     def _handle_show_rule_documentation(self, rule_id: str) -> None:
         if not rule_id:
@@ -197,5 +216,8 @@ class PowerShellEditorServices(AbstractPlugin):
 
         sublime.run_command(
             "open_url",
-            {"url": "https://docs.microsoft.com/powershell/utility-modules/psscriptanalyzer/rules/" + rule_id}
+            {
+                "url": "https://docs.microsoft.com/powershell/utility-modules/psscriptanalyzer/rules/"
+                + rule_id
+            },
         )
