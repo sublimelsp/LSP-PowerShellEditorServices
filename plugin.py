@@ -10,9 +10,13 @@ from zipfile import ZipFile
 
 import sublime
 
-from LSP.plugin import AbstractPlugin
-from LSP.plugin import ClientConfig
-from LSP.plugin import WorkspaceFolder
+from LSP.plugin import (
+    AbstractPlugin,
+    ClientConfig,
+    WorkspaceFolder,
+    register_plugin,
+    unregister_plugin,
+)
 from LSP.plugin.core.protocol import Location
 from LSP.plugin.locationpicker import LocationPicker
 
@@ -20,6 +24,10 @@ URL = "https://github.com/PowerShell/PowerShellEditorServices/releases/download/
 
 
 class PowerShellEditorServices(AbstractPlugin):
+    package_name: str = __spec__.parent
+    """
+    The real package name on file system.
+    """
 
     # ---- public API methods ----
 
@@ -114,8 +122,30 @@ class PowerShellEditorServices(AbstractPlugin):
     # ---- internal methods -----
 
     @classmethod
+    def cleanup(cls):
+        try:
+            from package_control import events  # type: ignore
+
+            if events.remove(cls.package_name):
+                sublime.set_timeout_async(cls.remove_basedir, 1000)
+        except ImportError:
+            pass  # Package Control is not required.
+
+    @classmethod
+    def remove_basedir(cls):
+        basedir = cls.basedir()
+        # Enable long path support on on Windows
+        # to avoid errors when cleaning up paths with more than 256 chars.
+        # see: https://stackoverflow.com/a/14076169/4643765
+        # see: https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
+        if sublime.platform() == "windows":
+            basedir = Rf"\\?\{basedir}"
+
+        shutil.rmtree(basedir, ignore_errors=True)
+
+    @classmethod
     def basedir(cls) -> str:
-        return os.path.join(cls.storage_path(), f"LSP-{cls.name()}")
+        return os.path.join(cls.storage_path(), cls.package_name)
 
     @classmethod
     def start_script(cls) -> str:
@@ -212,3 +242,12 @@ class PowerShellEditorServices(AbstractPlugin):
                 + rule_id
             },
         )
+
+
+def plugin_loaded():
+    register_plugin(PowerShellEditorServices)
+
+
+def plugin_unloaded():
+    PowerShellEditorServices.cleanup()
+    unregister_plugin(PowerShellEditorServices)
