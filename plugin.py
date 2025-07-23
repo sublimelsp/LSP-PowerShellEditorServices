@@ -1,8 +1,10 @@
+from __future__ import annotations
 import os
 import shutil
 import subprocess
 import tempfile
 
+from typing import Any, Callable
 from urllib.request import urlretrieve
 from zipfile import ZipFile
 
@@ -12,7 +14,6 @@ from LSP.plugin import AbstractPlugin
 from LSP.plugin import ClientConfig
 from LSP.plugin import WorkspaceFolder
 from LSP.plugin.core.protocol import Location
-from LSP.plugin.core.typing import Any, Callable, List, Mapping, Optional
 from LSP.plugin.locationpicker import LocationPicker
 
 URL = "https://github.com/PowerShell/PowerShellEditorServices/releases/download/v{}/PowerShellEditorServices.zip"
@@ -64,9 +65,9 @@ class PowerShellEditorServices(AbstractPlugin):
         cls,
         window: sublime.Window,
         initiating_view: sublime.View,
-        workspace_folders: List[WorkspaceFolder],
+        workspace_folders: list[WorkspaceFolder],
         configuration: ClientConfig,
-    ) -> Optional[str]:
+    ) -> str | None:
         powershell_exe = cls.powershell_exe()
         if not powershell_exe:
             return f"PowerShell is required to run {cls.name()}!"
@@ -97,7 +98,7 @@ class PowerShellEditorServices(AbstractPlugin):
         )
 
     def on_pre_server_command(
-        self, command: Mapping[str, Any], done_callback: Callable[[], None]
+        self, command: dict[str, Any], done_callback: Callable[[], None]
     ) -> bool:
         command_name = command["command"]
         if command_name == "editor.action.showReferences":
@@ -185,7 +186,7 @@ class PowerShellEditorServices(AbstractPlugin):
             args=args, cwd=kwargs.get("cwd"), startupinfo=startupinfo, timeout=10.0
         )
 
-    def _handle_show_references(self, references: List[Location]) -> None:
+    def _handle_show_references(self, references: list[Location]) -> None:
         session = self.weaksession()
         if not session:
             return
