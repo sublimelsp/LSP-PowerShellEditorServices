@@ -1,11 +1,13 @@
 from __future__ import annotations
+import contextlib
 import os
 import shutil
 import subprocess
 import tempfile
 
+from io import BytesIO
 from typing import Any, Callable
-from urllib.request import urlretrieve
+from urllib.request import urlopen
 from zipfile import ZipFile
 
 import sublime
@@ -19,8 +21,6 @@ from LSP.plugin import (
 )
 from LSP.plugin.core.protocol import Location
 from LSP.plugin.locationpicker import LocationPicker
-
-URL = "https://github.com/PowerShell/PowerShellEditorServices/releases/download/v{}/PowerShellEditorServices.zip"
 
 
 class PowerShellEditorServices(AbstractPlugin):
@@ -52,16 +52,15 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def install_or_update(cls) -> None:
-        shutil.rmtree(cls.basedir(), ignore_errors=True)
+        cls.remove_basedir()
         os.makedirs(cls.storage_path(), exist_ok=True)
+
         try:
-            zipfile = os.path.join(cls.storage_path(), f"{cls.name()}.zip")
-            urlretrieve(URL.format(cls.version_str()), zipfile)
-            with ZipFile(zipfile, "r") as f:
-                f.extractall(cls.basedir())
-            os.unlink(zipfile)
+            with contextlib.closing(urlopen(cls.download_url())) as response:
+                with ZipFile(BytesIO(response.read())) as arc:
+                    arc.extractall(cls.basedir())
         except Exception:
-            shutil.rmtree(cls.basedir(), ignore_errors=True)
+            cls.remove_basedir()
             raise
 
     @classmethod
@@ -142,6 +141,14 @@ class PowerShellEditorServices(AbstractPlugin):
             basedir = Rf"\\?\{basedir}"
 
         shutil.rmtree(basedir, ignore_errors=True)
+
+    @classmethod
+    def repo_url(cls) -> str:
+        return "https://github.com/PowerShell/PowerShellEditorServices"
+
+    @classmethod
+    def download_url(cls) -> str:
+        return f"{cls.repo_url()}/releases/download/v{cls.server_version()}/PowerShellEditorServices.zip"
 
     @classmethod
     def basedir(cls) -> str:
