@@ -35,12 +35,8 @@ class PowerShellEditorServices(AbstractPlugin):
                 # Install only, if powershell is available!
                 return False
             cmd = f'[System.Diagnostics.FileVersionInfo]::GetVersionInfo("{cls.dll_path()}").FileVersion'
-            version_info = cls.run(
-                powershell_exe, "-NoLogo", "-NoProfile", "-Command", cmd
-            ).decode("ascii")
-            version_info = ".".join(
-                version_info.splitlines()[0].strip().split(".")[0:3]
-            )
+            version_info = cls.run(powershell_exe, "-NoLogo", "-NoProfile", "-Command", cmd)
+            version_info = ".".join(version_info.splitlines()[0].strip().split(".")[0:3])
             return cls.version_str() != version_info
         except Exception:
             pass
@@ -93,9 +89,7 @@ class PowerShellEditorServices(AbstractPlugin):
             cls.session_details_path(),
         ]
 
-        return super().can_start(
-            window, initiating_view, workspace_folders, configuration
-        )
+        return super().can_start(window, initiating_view, workspace_folders, configuration)
 
     def on_pre_server_command(
         self, command: dict[str, Any], done_callback: Callable[[], None]
@@ -125,9 +119,7 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def start_script(cls) -> str:
-        return os.path.join(
-            cls.basedir(), "PowerShellEditorServices", "Start-EditorServices.ps1"
-        )
+        return os.path.join(cls.basedir(), "PowerShellEditorServices", "Start-EditorServices.ps1")
 
     @classmethod
     def host_version(cls) -> str:
@@ -175,7 +167,7 @@ class PowerShellEditorServices(AbstractPlugin):
         return powershell_exe
 
     @classmethod
-    def run(cls, *args: Any, **kwargs: Any) -> bytes:
+    def run(cls, *args: Any, **kwargs: Any) -> str:
         if sublime.platform() == "windows":
             startupinfo = subprocess.STARTUPINFO()
             startupinfo.dwFlags |= subprocess.STARTF_USESHOWWINDOW
@@ -183,7 +175,7 @@ class PowerShellEditorServices(AbstractPlugin):
         else:
             startupinfo = None
         return subprocess.check_output(
-            args=args, cwd=kwargs.get("cwd"), startupinfo=startupinfo, timeout=10.0
+            args=args, cwd=kwargs.get("cwd"), startupinfo=startupinfo, timeout=10.0, encoding="utf-8"
         )
 
     def _handle_show_references(self, references: list[Location]) -> None:
