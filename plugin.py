@@ -139,6 +139,8 @@ class PowerShellEditorServices(AbstractPlugin):
             "-HostVersion",
             cls.host_version(),
             "-Stdio",
+            "-LogLevel",
+            "Error",
             "-LogPath",
             cls.log_path(),
             "-SessionDetailsPath",
@@ -223,7 +225,7 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def log_path(cls) -> str:
-        return os.path.join(tempfile.gettempdir(), f"{cls.name()}.log")
+        return os.path.join(cls.basedir(), "logs")
 
     @classmethod
     def bundled_modules_path(cls) -> str:
@@ -291,6 +293,7 @@ class PowerShellEditorServices(AbstractPlugin):
 
 
 def plugin_loaded():
+    shutil.rmtree(PowerShellEditorServices.log_path(), ignore_errors=True)
     register_plugin(PowerShellEditorServices)
 
 
