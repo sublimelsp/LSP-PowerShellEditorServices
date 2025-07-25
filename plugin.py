@@ -90,15 +90,15 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def install_or_update(cls) -> None:
-        cls.remove_basedir()
+        cls.remove_server_path()
         os.makedirs(cls.storage_path(), exist_ok=True)
 
         try:
             with contextlib.closing(urlopen(cls.download_url())) as response:
                 with ZipFile(BytesIO(response.read())) as arc:
-                    arc.extractall(cls.basedir())
+                    arc.extractall(cls.server_path())
         except Exception:
-            cls.remove_basedir()
+            cls.remove_server_path()
             raise
 
         cls.save_metadata(True, cls.server_version)
@@ -177,21 +177,21 @@ class PowerShellEditorServices(AbstractPlugin):
             from package_control import events  # type: ignore
 
             if events.remove(cls.package_name):
-                sublime.set_timeout_async(cls.remove_basedir, 1000)
+                sublime.set_timeout_async(cls.remove_server_path, 1000)
         except ImportError:
             pass  # Package Control is not required.
 
     @classmethod
-    def remove_basedir(cls):
-        basedir = cls.basedir()
+    def remove_server_path(cls):
+        server_path = cls.server_path()
         # Enable long path support on on Windows
         # to avoid errors when cleaning up paths with more than 256 chars.
         # see: https://stackoverflow.com/a/14076169/4643765
         # see: https://learn.microsoft.com/en-us/windows/win32/fileio/maximum-file-path-limitation
         if sublime.platform() == "windows":
-            basedir = Rf"\\?\{basedir}"
+            server_path = Rf"\\?\{server_path}"
 
-        shutil.rmtree(basedir, ignore_errors=True)
+        shutil.rmtree(server_path, ignore_errors=True)
 
     @classmethod
     def repo_url(cls) -> str:
@@ -204,16 +204,18 @@ class PowerShellEditorServices(AbstractPlugin):
         )
 
     @classmethod
-    def basedir(cls) -> str:
+    def server_path(cls) -> str:
         try:
-            return cls._basedir
+            return cls._server_path
         except AttributeError:
-            cls._basedir = os.path.join(cls.storage_path(), cls.package_name)
-            return cls._basedir
+            cls._server_path = os.path.join(cls.storage_path(), cls.package_name)
+            return cls._server_path
 
     @classmethod
     def start_script(cls) -> str:
-        return os.path.join(cls.basedir(), "PowerShellEditorServices", "Start-EditorServices.ps1")
+        return os.path.join(
+            cls.server_path(), "PowerShellEditorServices", "Start-EditorServices.ps1"
+        )
 
     @classmethod
     def host_version(cls) -> str:
@@ -225,15 +227,15 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def log_path(cls) -> str:
-        return os.path.join(cls.basedir(), "logs")
+        return os.path.join(cls.server_path(), "logs")
 
     @classmethod
     def bundled_modules_path(cls) -> str:
-        return cls.basedir()
+        return cls.server_path()
 
     @classmethod
     def metadata_file(cls) -> str:
-        return os.path.join(cls.basedir(), "update.json")
+        return os.path.join(cls.server_path(), "update.json")
 
     @classmethod
     def load_metadata(cls) -> tuple[int, str]:
