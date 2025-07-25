@@ -3,7 +3,6 @@ import contextlib
 import json
 import os
 import shutil
-import tempfile
 import time
 
 from io import BytesIO
@@ -144,7 +143,7 @@ class PowerShellEditorServices(AbstractPlugin):
             "-LogPath",
             cls.log_path(),
             "-SessionDetailsPath",
-            cls.session_details_path(),
+            cls.session_details_file(),
         ]
 
         return super().can_start(window, initiating_view, workspace_folders, configuration)
@@ -222,8 +221,8 @@ class PowerShellEditorServices(AbstractPlugin):
         return f"{sublime.version()}.0.0"
 
     @classmethod
-    def session_details_path(cls) -> str:
-        return os.path.join(tempfile.gettempdir(), f"{cls.name()}.json")
+    def session_details_file(cls) -> str:
+        return os.path.join(cls.server_path(), "session.json")
 
     @classmethod
     def log_path(cls) -> str:
