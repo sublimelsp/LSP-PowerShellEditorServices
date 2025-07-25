@@ -71,15 +71,10 @@ class PowerShellEditorServices(AbstractPlugin):
         if cls.server_version == "latest":
             if int(time.time()) >= next_update_check:
                 try:
-                    # response url ends with latest available version number
-                    request = HttpRequest(url=f"{cls.repo_url()}/releases/latest", method="HEAD")
-                    with contextlib.closing(urlopen(request)) as response:
-                        available_version = response.url.rstrip("/").rsplit("/", 1)[1]
-                        if available_version[0] == "v":
-                            available_version = available_version[1:]
-                        if available_version != server_version:
-                            cls.server_version = available_version
-                            return True
+                    available_version = cls.available_version()
+                    if available_version != server_version:
+                        cls.server_version = available_version
+                        return True
                 except Exception:
                     cls.save_metadata(False, server_version)
 
@@ -169,6 +164,16 @@ class PowerShellEditorServices(AbstractPlugin):
         pass
 
     # ---- internal methods -----
+
+    @classmethod
+    def available_version(cls) -> str:
+        # response url ends with latest available version number
+        request = HttpRequest(url=f"{cls.repo_url()}/releases/latest", method="HEAD")
+        with contextlib.closing(urlopen(request)) as response:
+            available_version = response.url.rstrip("/").rsplit("/", 1)[1]
+        if available_version[0] == "v":
+            available_version = available_version[1:]
+        return available_version
 
     @classmethod
     def cleanup(cls):
