@@ -203,7 +203,11 @@ class PowerShellEditorServices(AbstractPlugin):
 
     @classmethod
     def basedir(cls) -> str:
-        return os.path.join(cls.storage_path(), cls.package_name)
+        try:
+            return cls._basedir
+        except AttributeError:
+            cls._basedir = os.path.join(cls.storage_path(), cls.package_name)
+            return cls._basedir
 
     @classmethod
     def start_script(cls) -> str:
