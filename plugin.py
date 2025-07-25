@@ -130,13 +130,13 @@ class PowerShellEditorServices(AbstractPlugin):
             "-File",
             cls.start_script(),
             "-BundledModulesPath",
-            cls.bundled_modules_path(),
+            cls.server_path(),
             "-HostName",
             "SublimeText",
             "-HostProfileId",
             "SublimeText",
             "-HostVersion",
-            cls.host_version(),
+            f"{sublime.version()}.0.0",
             "-Stdio",
             "-LogLevel",
             "Error",
@@ -217,20 +217,12 @@ class PowerShellEditorServices(AbstractPlugin):
         )
 
     @classmethod
-    def host_version(cls) -> str:
-        return f"{sublime.version()}.0.0"
-
-    @classmethod
-    def session_details_file(cls) -> str:
-        return os.path.join(cls.server_path(), "session.json")
-
-    @classmethod
     def log_path(cls) -> str:
         return os.path.join(cls.server_path(), "logs")
 
     @classmethod
-    def bundled_modules_path(cls) -> str:
-        return cls.server_path()
+    def session_details_file(cls) -> str:
+        return os.path.join(cls.server_path(), "session.json")
 
     @classmethod
     def metadata_file(cls) -> str:
