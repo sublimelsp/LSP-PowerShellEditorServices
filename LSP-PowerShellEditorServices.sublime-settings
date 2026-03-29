@@ -10,7 +10,7 @@
 
 	"selector": "source.powershell",
 	"schemes": ["file", "buffer"],
-	"initializationOptions": {},
+	"initialization_options": {},
 	"settings": {
 		// Adds a space before and after the pipeline operator ('|') if it is missing.
 		"powershell.codeFormatting.addWhitespaceAroundPipe": true,
