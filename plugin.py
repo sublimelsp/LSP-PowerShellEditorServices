@@ -6,7 +6,7 @@ import shutil
 import time
 
 from io import BytesIO
-from typing import Any, Callable
+from typing import Any, Callable, cast, final
 from urllib.request import urlopen, Request as HttpRequest
 from zipfile import ZipFile
 
@@ -19,10 +19,12 @@ from LSP.plugin import (
     register_plugin,
     unregister_plugin,
 )
-from LSP.plugin.core.protocol import Location
 from LSP.plugin.locationpicker import LocationPicker
+from LSP.protocol import ExecuteCommandParams
+from LSP.protocol import Location
 
 
+@final
 class PowerShellEditorServices(AbstractPlugin):
     package_name: str = __spec__.parent
     """
@@ -144,17 +146,20 @@ class PowerShellEditorServices(AbstractPlugin):
         return super().can_start(window, initiating_view, workspace_folders, configuration)
 
     def on_pre_server_command(
-        self, command: dict[str, Any], done_callback: Callable[[], None]
+        self, command: ExecuteCommandParams, done_callback: Callable[[], None]
     ) -> bool:
         command_name = command["command"]
-        if command_name == "editor.action.showReferences":
-            _, _, references = command["arguments"]
-            self._handle_show_references(references)
+        if (command_name == "editor.action.showReferences") and (
+            args := command.get("arguments")
+        ):
+            self._handle_show_references(cast(list[Location], args[2]))
             done_callback()
             return True
 
-        if command_name == "PowerShell.ShowCodeActionDocumentation":
-            self._handle_show_rule_documentation(command["arguments"][0])
+        if (command_name == "PowerShell.ShowCodeActionDocumentation") and (
+            args := command.get("arguments")
+        ):
+            self._handle_show_rule_documentation(cast(str, args[0]))
             done_callback()
             return True
 
