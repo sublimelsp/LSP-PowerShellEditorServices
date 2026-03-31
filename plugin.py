@@ -1,27 +1,27 @@
 from __future__ import annotations
+
+from io import BytesIO
+from LSP.plugin import AbstractPlugin
+from LSP.plugin import ClientConfig
+from LSP.plugin import register_plugin
+from LSP.plugin import unregister_plugin
+from LSP.plugin import WorkspaceFolder
+from LSP.plugin.locationpicker import LocationPicker
+from LSP.protocol import ExecuteCommandParams
+from LSP.protocol import Location
+from typing import Any
+from typing import Callable
+from typing import cast
+from typing import final
+from urllib.request import Request as HttpRequest
+from urllib.request import urlopen
+from zipfile import ZipFile
 import contextlib
 import json
 import os
 import shutil
-import time
-
-from io import BytesIO
-from typing import Any, Callable, cast, final
-from urllib.request import urlopen, Request as HttpRequest
-from zipfile import ZipFile
-
 import sublime
-
-from LSP.plugin import (
-    AbstractPlugin,
-    ClientConfig,
-    WorkspaceFolder,
-    register_plugin,
-    unregister_plugin,
-)
-from LSP.plugin.locationpicker import LocationPicker
-from LSP.protocol import ExecuteCommandParams
-from LSP.protocol import Location
+import time
 
 
 @final
