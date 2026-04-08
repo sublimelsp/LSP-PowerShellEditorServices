@@ -1,16 +1,15 @@
 from __future__ import annotations
+
 import contextlib
 import json
 import os
 import shutil
+import sublime
 import time
-
 from io import BytesIO
 from typing import Any, Callable, cast, final
-from urllib.request import urlopen, Request as HttpRequest
+from urllib.request import Request as HttpRequest, urlopen
 from zipfile import ZipFile
-
-import sublime
 
 from LSP.plugin import (
     AbstractPlugin,
@@ -20,8 +19,7 @@ from LSP.plugin import (
     unregister_plugin,
 )
 from LSP.plugin.locationpicker import LocationPicker
-from LSP.protocol import ExecuteCommandParams
-from LSP.protocol import Location
+from LSP.protocol import ExecuteCommandParams, Location
 
 
 @final
