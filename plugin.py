@@ -14,11 +14,11 @@ from zipfile import ZipFile
 from LSP.plugin import (
     AbstractPlugin,
     ClientConfig,
+    LocationPicker,
     WorkspaceFolder,
     register_plugin,
     unregister_plugin,
 )
-from LSP.plugin.locationpicker import LocationPicker
 from LSP.protocol import ExecuteCommandParams, Location
 
 
