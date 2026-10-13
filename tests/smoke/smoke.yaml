@@ -1,5 +1,7 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/sublimelsp/lsp_smoke_test/v1/smoke.schema.json
 file: sample.ps1
+# The session is named after the AbstractPlugin class, not the package.
+server: PowerShellEditorServices
 # PSAvoidUsingCmdletAliases: 'gci' is an alias of 'Get-ChildItem'.
 expected_diagnostics:
   source: PSScriptAnalyzer
