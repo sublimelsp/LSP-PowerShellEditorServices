@@ -7,64 +7,83 @@ import shutil
 import sublime
 import time
 from io import BytesIO
-from typing import Any, Callable, cast, final
+from pathlib import Path
+from typing import Any, cast, final
 from urllib.request import Request as HttpRequest, urlopen
 from zipfile import ZipFile
 
 from LSP.plugin import (
-    AbstractPlugin,
-    ClientConfig,
     LocationPicker,
-    WorkspaceFolder,
-    register_plugin,
-    unregister_plugin,
+    LspPlugin,
+    OnPreStartContext,
+    PluginStartError,
+    Promise,
+    command_handler,
+    notification_handler,
 )
-from LSP.protocol import ExecuteCommandParams, Location
+from LSP.protocol import LSPAny, Location
 
 
 @final
-class PowerShellEditorServices(AbstractPlugin):
-    package_name: str = __spec__.parent
-    """
-    The package name on file system.
-
-    Main purpose is to provide python version acnostic package name for use
-    in path sensitive locations, to ensure plugin even works if user installs
-    package with different name.
-    """
-
+class PowerShellEditorServices(LspPlugin):
     server_version: str = ""
     """
     The language server version to use.
     """
 
-    settings: sublime.Settings
-    """
-    Package settings
-    """
-
     # ---- public API methods ----
 
     @classmethod
-    def name(cls) -> str:
-        return cls.__name__
+    def on_pre_start_async(cls, context: OnPreStartContext) -> None:
+        configuration = context.configuration
+        if cls.needs_update_or_installation(str(configuration.root_settings.get("version", "latest"))):
+            cls.install_or_update()
+
+        # find powershell executable
+        powershell = configuration.settings.get("powershell_exe")
+        if not powershell or not isinstance(powershell, str):
+            powershell = "pwsh"
+            if not shutil.which(powershell):
+                if sublime.platform() == "windows":
+                    powershell = "powershell.exe"
+                else:
+                    powershell = ""
+
+        if not powershell:
+            raise PluginStartError(f"PowerShell is required to run {cls.name}!")
+
+        configuration.command = [
+            powershell,
+            "-NoLogo",
+            "-NoProfile",
+            "-File",
+            str(cls.start_script()),
+            "-BundledModulesPath",
+            str(cls.plugin_storage_path),
+            "-HostName",
+            "SublimeText",
+            "-HostProfileId",
+            "SublimeText",
+            "-HostVersion",
+            f"{sublime.version()}.0.0",
+            "-Stdio",
+            "-LogLevel",
+            "Error",
+            "-LogPath",
+            str(cls.log_path()),
+            "-SessionDetailsPath",
+            str(cls.session_details_file()),
+        ]
 
     @classmethod
-    def configuration(cls):
-        settings_file_name = f"LSP-{cls.name()}.sublime-settings"
-        cls.settings = sublime.load_settings(settings_file_name)
-        return cls.settings, f"Packages/{cls.package_name}/{settings_file_name}"
-
-    @classmethod
-    def needs_update_or_installation(cls) -> bool:
-        server_file = cls.start_script()
-        is_upgrade = os.path.isfile(server_file)
+    def needs_update_or_installation(cls, version: str) -> bool:
+        is_upgrade = cls.start_script().is_file()
         if is_upgrade:
             next_update_check, server_version = cls.load_metadata()
         else:
             next_update_check, server_version = 0, ""
 
-        cls.server_version = str(cls.settings.get("version", "latest"))
+        cls.server_version = version
         if cls.server_version[0] == "v":
             cls.server_version = cls.server_version[1:]
 
@@ -85,85 +104,32 @@ class PowerShellEditorServices(AbstractPlugin):
     @classmethod
     def install_or_update(cls) -> None:
         cls.remove_server_path()
-        os.makedirs(cls.storage_path(), exist_ok=True)
+        os.makedirs(cls.plugin_storage_path.parent, exist_ok=True)
 
         try:
             with contextlib.closing(urlopen(cls.download_url())) as response:
                 with ZipFile(BytesIO(response.read())) as arc:
-                    arc.extractall(cls.server_path())
+                    arc.extractall(cls.plugin_storage_path)
         except Exception:
             cls.remove_server_path()
             raise
 
         cls.save_metadata(True, cls.server_version)
 
-    @classmethod
-    def can_start(
-        cls,
-        window: sublime.Window,
-        initiating_view: sublime.View,
-        workspace_folders: list[WorkspaceFolder],
-        configuration: ClientConfig,
-    ) -> str | None:
-        # find powershell executable
-        powershell = configuration.settings.get("powershell_exe")
-        if not powershell or not isinstance(powershell, str):
-            powershell = "pwsh"
-            if not shutil.which(powershell):
-                if sublime.platform() == "windows":
-                    powershell = "powershell.exe"
-                else:
-                    powershell = ""
+    @command_handler("editor.action.showReferences")
+    def on_show_references(self, arguments: list[LSPAny] | None) -> Promise[None]:
+        if arguments:
+            self._handle_show_references(cast("list[Location]", arguments[2]))
+        return Promise.resolve(None)
 
-        if not powershell:
-            return f"PowerShell is required to run {cls.name()}!"
+    @command_handler("PowerShell.ShowCodeActionDocumentation")
+    def on_show_code_action_documentation(self, arguments: list[LSPAny] | None) -> Promise[None]:
+        if arguments:
+            self._handle_show_rule_documentation(cast(str, arguments[0]))
+        return Promise.resolve(None)
 
-        configuration.command = [
-            powershell,
-            "-NoLogo",
-            "-NoProfile",
-            "-File",
-            cls.start_script(),
-            "-BundledModulesPath",
-            cls.server_path(),
-            "-HostName",
-            "SublimeText",
-            "-HostProfileId",
-            "SublimeText",
-            "-HostVersion",
-            f"{sublime.version()}.0.0",
-            "-Stdio",
-            "-LogLevel",
-            "Error",
-            "-LogPath",
-            cls.log_path(),
-            "-SessionDetailsPath",
-            cls.session_details_file(),
-        ]
-
-        return super().can_start(window, initiating_view, workspace_folders, configuration)
-
-    def on_pre_server_command(
-        self, command: ExecuteCommandParams, done_callback: Callable[[], None]
-    ) -> bool:
-        command_name = command["command"]
-        if (command_name == "editor.action.showReferences") and (
-            args := command.get("arguments")
-        ):
-            self._handle_show_references(cast(list[Location], args[2]))
-            done_callback()
-            return True
-
-        if (command_name == "PowerShell.ShowCodeActionDocumentation") and (
-            args := command.get("arguments")
-        ):
-            self._handle_show_rule_documentation(cast(str, args[0]))
-            done_callback()
-            return True
-
-        return False
-
-    def m_powerShell_executionStatusChanged(self, params: Any) -> None:
+    @notification_handler("powerShell/executionStatusChanged")
+    def on_execution_status_changed(self, params: Any) -> None:
         pass
 
     # ---- internal methods -----
@@ -183,14 +149,14 @@ class PowerShellEditorServices(AbstractPlugin):
         try:
             from package_control import events  # type: ignore
 
-            if events.remove(cls.package_name):
+            if events.remove(cls.name):
                 sublime.set_timeout_async(cls.remove_server_path, 1000)
         except ImportError:
             pass  # Package Control is not required.
 
     @classmethod
     def remove_server_path(cls):
-        server_path = cls.server_path()
+        server_path = str(cls.plugin_storage_path)
         # Enable long path support on on Windows
         # to avoid errors when cleaning up paths with more than 256 chars.
         # see: https://stackoverflow.com/a/14076169/4643765
@@ -211,30 +177,20 @@ class PowerShellEditorServices(AbstractPlugin):
         )
 
     @classmethod
-    def server_path(cls) -> str:
-        try:
-            return cls._server_path
-        except AttributeError:
-            cls._server_path = os.path.join(cls.storage_path(), cls.package_name)
-            return cls._server_path
+    def start_script(cls) -> Path:
+        return cls.plugin_storage_path / "PowerShellEditorServices" / "Start-EditorServices.ps1"
 
     @classmethod
-    def start_script(cls) -> str:
-        return os.path.join(
-            cls.server_path(), "PowerShellEditorServices", "Start-EditorServices.ps1"
-        )
+    def log_path(cls) -> Path:
+        return cls.plugin_storage_path / "logs"
 
     @classmethod
-    def log_path(cls) -> str:
-        return os.path.join(cls.server_path(), "logs")
+    def session_details_file(cls) -> Path:
+        return cls.plugin_storage_path / "session.json"
 
     @classmethod
-    def session_details_file(cls) -> str:
-        return os.path.join(cls.server_path(), "session.json")
-
-    @classmethod
-    def metadata_file(cls) -> str:
-        return os.path.join(cls.server_path(), "update.json")
+    def metadata_file(cls) -> Path:
+        return cls.plugin_storage_path / "update.json"
 
     @classmethod
     def load_metadata(cls) -> tuple[int, str]:
@@ -295,9 +251,9 @@ class PowerShellEditorServices(AbstractPlugin):
 
 def plugin_loaded():
     shutil.rmtree(PowerShellEditorServices.log_path(), ignore_errors=True)
-    register_plugin(PowerShellEditorServices)
+    PowerShellEditorServices.register()
 
 
 def plugin_unloaded():
     PowerShellEditorServices.cleanup()
-    unregister_plugin(PowerShellEditorServices)
+    PowerShellEditorServices.unregister()
