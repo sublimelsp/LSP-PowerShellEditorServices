@@ -4,5 +4,3 @@ file: sample.ps1
 expected_diagnostics:
   source: PSScriptAnalyzer
   code: PSAvoidUsingCmdletAliases
-# Starting the server includes downloading PowerShellEditorServices and loading PSScriptAnalyzer.
-diagnostics_timeout: 300
