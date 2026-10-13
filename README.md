@@ -67,7 +67,7 @@ To provide both a global fallback and project specific files ...
       {
          "LSP":
          {
-            "PowerShellEditorServices": {
+            "LSP-PowerShellEditorServices": {
                "settings": {
                   "powershell.scriptAnalysis.settingsPath": "PSScriptAnalyzerSettings.psd1",
                },
