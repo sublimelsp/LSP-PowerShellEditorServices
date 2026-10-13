@@ -1,0 +1,8 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/sublimelsp/lsp_smoke_test/v1/smoke.schema.json
+file: sample.ps1
+# PSAvoidUsingCmdletAliases: 'gci' is an alias of 'Get-ChildItem'.
+expected_diagnostics:
+  source: PSScriptAnalyzer
+  code: PSAvoidUsingCmdletAliases
+# Starting the server includes downloading PowerShellEditorServices and loading PSScriptAnalyzer.
+diagnostics_timeout: 300

@@ -1,0 +1,1 @@
+gci | Out-Null
