@@ -13,4 +13,4 @@ jobs:
     with:
       # Provides the PowerShell syntax that the server is enabled for.
       # PowerShell itself is preinstalled on the GitHub-hosted runners.
-      extra-packages: SublimeText/PowerShell
+      extra-packages: PowerShell
