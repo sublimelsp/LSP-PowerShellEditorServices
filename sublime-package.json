@@ -128,6 +128,16 @@
                       "description": "Adds a space after an opening brace ('{') and before a closing brace ('}').",
                       "type": "boolean"
                     },
+                    "powershell.codeFormatting.avoidSemicolonsAsLineTerminators": {
+                      "default": false,
+                      "description": "Removes redundant semicolon(s) at the end of a line where a line terminator is sufficient.",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.alignEnumMemberValues": {
+                      "default": true,
+                      "description": "Align member value assignments in an Enum Type Definition.",
+                      "type": "boolean"
+                    },
                     "powershell.enableProfileLoading": {
                       "default": true,
                       "description": "Loads user and system-wide PowerShell profiles (profile.ps1 and Microsoft.VSCode_profile.ps1) into the PowerShell session. This affects IntelliSense and interactive script execution, but it does not affect the debugger.",
