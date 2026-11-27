@@ -13,10 +13,14 @@
 	"settings": {
 		// Adds a space before and after the pipeline operator ('|') if it is missing.
 		"powershell.codeFormatting.addWhitespaceAroundPipe": true,
+		// Align member value assignments in an Enum Type Definition.
+		"powershell.codeFormatting.alignEnumMemberValues": true,
 		// Align assignment statements in a hashtable or a DSC Configuration.
 		"powershell.codeFormatting.alignPropertyValuePairs": true,
 		// Replaces aliases with their aliased name.
 		"powershell.codeFormatting.autoCorrectAliases": false,
+		// Removes redundant semicolon(s) at the end of a line where a line terminator is sufficient.
+		"powershell.codeFormatting.avoidSemicolonsAsLineTerminators": false,
 		// Does not reformat one-line code blocks, such as "if (...) {...} else {...}".
 		"powershell.codeFormatting.ignoreOneLineBlock": true,
 		// Adds a newline (line break) after a closing brace.

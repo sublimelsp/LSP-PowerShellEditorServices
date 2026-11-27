@@ -26,6 +26,11 @@
                       "description": "Adds a space before and after the pipeline operator ('|') if it is missing.",
                       "type": "boolean"
                     },
+                    "powershell.codeFormatting.alignEnumMemberValues": {
+                      "default": true,
+                      "description": "Align member value assignments in an Enum Type Definition.",
+                      "type": "boolean"
+                    },
                     "powershell.codeFormatting.alignPropertyValuePairs": {
                       "default": true,
                       "description": "Align assignment statements in a hashtable or a DSC Configuration.",
@@ -34,6 +39,11 @@
                     "powershell.codeFormatting.autoCorrectAliases": {
                       "default": false,
                       "description": "Replaces aliases with their aliased name.",
+                      "type": "boolean"
+                    },
+                    "powershell.codeFormatting.avoidSemicolonsAsLineTerminators": {
+                      "default": false,
+                      "description": "Removes redundant semicolon(s) at the end of a line where a line terminator is sufficient.",
                       "type": "boolean"
                     },
                     "powershell.codeFormatting.ignoreOneLineBlock": {
